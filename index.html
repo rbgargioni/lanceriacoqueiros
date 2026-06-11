@@ -11,7 +11,7 @@
 
     <header>
         <div class="header-container">
-            <img src="img/logo.jpg" alt="Logo Coqueiro" class="logo">
+            <img src="img/logo.png" alt="Logo Coqueiro" class="logo">
             <div class="header-info">
                 <h1>Lancheria Coqueiro</h1>
                 <p><i class="fas fa-star"></i> 4.9 • Desde 1977</p>
@@ -70,17 +70,25 @@
                     <input type="tel" id="user-telefone" placeholder="(51) 99999-9999" required>
                 </div>
                 <div class="form-group">
+                    <label>Cidade:</label>
+                    <input type="text" id="user-cidade" value="Porto Alegre" required>
+                </div>
+                <div class="form-group">
+                    <label>Bairro:</label>
+                    <input type="text" id="user-bairro" placeholder="Digite seu bairro" required>
+                </div>
+                <div class="form-group">
                     <label>Rua / Avenida:</label>
                     <input type="text" id="user-rua" placeholder="Ex: Av. Bento Gonçalves" required>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <div style="flex: 1;" class="form-group">
-                        <label>Nº:</label>
-                        <input type="text" id="user-numero" required>
+                        <label>Número:</label>
+                        <input type="text" id="user-numero" placeholder="Nº" required>
                     </div>
                     <div style="flex: 2;" class="form-group">
-                        <label>Bairro:</label>
-                        <input type="text" id="user-bairro" required>
+                        <label>Complemento:</label>
+                        <input type="text" id="user-complemento" placeholder="Apto, Bloco, Casa (Opcional)">
                     </div>
                 </div>
                 <button type="submit" class="btn-salvar-cadastro">Salvar Cadastro e Continuar</button>

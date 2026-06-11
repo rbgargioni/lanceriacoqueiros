@@ -37,7 +37,7 @@ onAuthStateChanged(auth, async (user) => {
             userInfo.innerText = `Olá, ${user.displayName.split(' ')[0]}`;
         }
         
-        // Validação se o perfil de entrega já existe
+        // Verifica se o perfil de entrega já existe na coleção 'usuarios'
         const userDocRef = doc(db, "usuarios", user.uid);
         const userDoc = await getDoc(userDocRef);
 
@@ -51,27 +51,36 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// Manipulador do formulário complementar
+// Manipulador do formulário complementar baseado na sua estrutura do Firestore
 document.getElementById("form-completar-cadastro").addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!usuarioLogado) return;
 
     const telefone = document.getElementById("user-telefone").value;
+    const cidade = document.getElementById("user-cidade").value;
+    const bairro = document.getElementById("user-bairro").value;
     const rua = document.getElementById("user-rua").value;
     const numero = document.getElementById("user-numero").value;
-    const bairro = document.getElementById("user-bairro").value;
+    const complemento = document.getElementById("user-complemento").value;
 
     try {
+        // Salva os dados seguindo a sua estrutura exata de campos de endereço
         await setDoc(doc(db, "usuarios", usuarioLogado.uid), {
             nome: usuarioLogado.displayName,
             email: usuarioLogado.email,
             telefone: telefone,
             isAdmin: false,
-            enderecos: [{ rua, numero, bairro, cidade: "Porto Alegre", principal: true }]
+            endereco: {
+                cidade: cidade,
+                bairro: bairro,
+                rua: rua,
+                numero: numero,
+                complemento: complemento
+            }
         });
 
         document.getElementById("modal-cadastro-usuario").classList.add("hidden");
-        alert("Perfil de entrega configurado!");
+        alert("Perfil de entrega configurado com sucesso!");
     } catch (error) {
         console.error("Erro ao salvar cadastro do cliente:", error);
     }
@@ -123,12 +132,12 @@ function renderizarLanches(lanches) {
 }
 
 // ==========================================
-// GERENCIADOR LOGICO DO CARRINHO (MEMÓRIA)
+// GERENCIADOR LÓGICO DO CARRINHO
 // ==========================================
 function adicionarEventosBotoes() {
     document.querySelectorAll(".btn-add-carrinho").forEach(botao => {
         botao.addEventListener("click", (e) => {
-            e.stopPropagation(); // Evita disparar a abertura do modal ao clicar no botão '+'
+            e.stopPropagation();
             const lancheId = e.currentTarget.getAttribute("data-id");
             adicionarAoCarrinho(lancheId);
         });
@@ -143,7 +152,7 @@ function adicionarAoCarrinho(id) {
     if (itemNoCarrinho) {
         itemNoCarrinho.quantidade += 1;
     } else {
-        carrinho.push({ id: lanche.id, nome: lanche.nome, preco: lanche.preco, quantidade: 1 });
+        carrinho.push({ id: lanche.id, nome: lanche.nome, preco: lanche.preco, Club: lanche.Club || "", quantidade: 1 });
     }
     atualizarBarraCarrinho();
 }
