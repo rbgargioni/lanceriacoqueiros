@@ -10,7 +10,7 @@
 
     <header style="border-radius: 0 0 10px 10px;">
         <div class="header-container">
-            <img src="img/logo.jpg" alt="Logo Coqueiro" class="logo">
+            <img src="image_2c6c35.png" alt="Logo Coqueiro" class="logo">
             <div>
                 <h1>Painel de Controle</h1>
                 <p>Cadastro de Cardápio</p>
@@ -31,7 +31,7 @@
 
                 <div style="margin-bottom: 15px;">
                     <label style="display:block; margin-bottom: 5px; font-weight: 600;">Categoria:</label>
-                    <select id="categoria" style="width:100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
+                    <select id="categoria" required style="width:100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background: white;">
                         <option value="xis">Xis</option>
                         <option value="hamburguer">Hambúrguer</option>
                         <option value="porcoes">Porções</option>
@@ -54,9 +54,7 @@
                     <textarea id="descricao" rows="3" required style="width:100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; resize: none;"></textarea>
                 </div>
 
-                <button type="submit" style="width: 100%; background: var(--cor-primaria); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">
-                    Salvar no Firebase
-                </button>
+                <button type="submit" style="width: 100%; background: var(--cor-primaria); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem;">Cadastrar no Cardápio</button>
             </form>
         </div>
     </main>

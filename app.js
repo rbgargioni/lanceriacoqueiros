@@ -52,39 +52,43 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // Manipulador do formulário complementar baseado na sua estrutura do Firestore
-document.getElementById("form-completar-cadastro").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!usuarioLogado) return;
+const formCadastro = document.getElementById("form-completar-cadastro");
+if (formCadastro) {
+    formCadastro.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!usuarioLogado) return;
 
-    const telefone = document.getElementById("user-telefone").value;
-    const cidade = document.getElementById("user-cidade").value;
-    const bairro = document.getElementById("user-bairro").value;
-    const rua = document.getElementById("user-rua").value;
-    const numero = document.getElementById("user-numero").value;
-    const complemento = document.getElementById("user-complemento").value;
+        const telefone = document.getElementById("user-telefone").value || "";
+        const cidade = document.getElementById("user-cidade").value || "";
+        const bairro = document.getElementById("user-bairro").value || "";
+        const rua = document.getElementById("user-rua").value || "";
+        const numero = document.getElementById("user-numero").value || "";
+        const complemento = document.getElementById("user-complemento").value || ""; 
 
-    try {
-        // Salva os dados seguindo a sua estrutura exata de campos de endereço
-        await setDoc(doc(db, "usuarios", usuarioLogado.uid), {
-            nome: usuarioLogado.displayName,
-            email: usuarioLogado.email,
-            telefone: telefone,
-            isAdmin: false,
-            endereco: {
-                cidade: cidade,
-                bairro: bairro,
-                rua: rua,
-                numero: numero,
-                complemento: complemento
-            }
-        });
+        try {
+            // Salva os dados seguindo a sua estrutura exata de campos de endereço
+            await setDoc(doc(db, "usuarios", usuarioLogado.uid), {
+                nome: usuarioLogado.displayName,
+                email: usuarioLogado.email,
+                telefone: telefone,
+                isAdmin: false,
+                endereco: {
+                    cidade: cidade,
+                    bairro: bairro,
+                    rua: rua,
+                    numero: numero,
+                    complemento: complemento
+                }
+            });
 
-        document.getElementById("modal-cadastro-usuario").classList.add("hidden");
-        alert("Perfil de entrega configurado com sucesso!");
-    } catch (error) {
-        console.error("Erro ao salvar cadastro do cliente:", error);
-    }
-});
+            document.getElementById("modal-cadastro-usuario").classList.add("hidden");
+            alert("Perfil de entrega configurado com sucesso!");
+        } catch (error) {
+            console.error("Erro ao salvar cadastro do cliente:", error);
+            alert("Erro ao salvar no banco. Verifique o console.");
+        }
+    });
+}
 
 // ==========================================
 // RENDERIZADOR DO CARDÁPIO EM TEMPO REAL
@@ -96,7 +100,7 @@ function carregarCardapio() {
     onSnapshot(q, (snapshot) => {
         listaLanches = [];
         if (snapshot.empty) {
-            menuContainer.innerHTML = `<div style="text-align:center; padding:30px;">Cardápio indisponível no momento.</div>`;
+            menuContainer.innerHTML = `<div style="text-align:center; padding:30px; color:#717171;">Cardápio indisponível no momento.</div>`;
             return;
         }
 
@@ -105,19 +109,23 @@ function carregarCardapio() {
         });
 
         renderizarLanches(listaLanches);
+    }, (error) => {
+        console.error("Erro ao carregar lanches do Firestore:", error);
     });
 }
 
 function renderizarLanches(lanches) {
+    if (!menuContainer) return;
     menuContainer.innerHTML = "";
     lanches.forEach(lanche => {
+        const precoNum = typeof lanche.preco === 'number' ? lanche.preco : parseFloat(lanche.preco) || 0;
         const card = document.createElement("div");
         card.classList.add("lanche-card");
         card.innerHTML = `
             <div class="lanche-info">
                 <h3>${lanche.nome}</h3>
                 <p>${lanche.descricao}</p>
-                <div class="lanche-preco">R$ ${lanche.preco.toFixed(2).replace('.', ',')}</div>
+                <div class="lanche-preco">R$ ${precoNum.toFixed(2).replace('.', ',')}</div>
             </div>
             <div class="lanche-img-container">
                 <img src="${lanche.imagemUrl}" alt="${lanche.nome}" class="lanche-img" onerror="this.src='image_2c6f96.jpg'">
@@ -148,11 +156,12 @@ function adicionarAoCarrinho(id) {
     const lanche = listaLanches.find(item => item.id === id);
     if (!lanche) return;
 
+    const precoNum = typeof lanche.preco === 'number' ? lanche.preco : parseFloat(lanche.preco) || 0;
     const itemNoCarrinho = carrinho.find(item => item.id === id);
     if (itemNoCarrinho) {
         itemNoCarrinho.quantidade += 1;
     } else {
-        carrinho.push({ id: lanche.id, nome: lanche.nome, preco: lanche.preco, Club: lanche.Club || "", quantidade: 1 });
+        carrinho.push({ id: lanche.id, nome: lanche.nome, preco: precoNum, quantidade: 1 });
     }
     atualizarBarraCarrinho();
 }
