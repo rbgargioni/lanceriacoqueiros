@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lancheria Coqueiro - Desde 1977</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <img src="/img/logo.jpg" alt="Logo Coqueiro" class="logo">
+            <div class="header-info">
+                <h1>Lancheria Coqueiro</h1>
+                <p><i class="fas fa-star"></i> 4.9 • Desde 1977</p>
+            </div>
+        </div>
+        <div id="auth-section">
+            <button id="btn-login" class="btn-secondary" style="background: white; color: var(--cor-primaria); border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer;"><i class="fab fa-google"></i> Entrar</button>
+            <span id="user-info" class="hidden" style="font-weight: bold; font-size: 0.9rem;"></span>
+        </div>
+    </header>
+
+    <nav class="categories">
+        <button class="cat-item active" onclick="filtrarCategoria('todos')">Todos</button>
+        <button class="cat-item" onclick="filtrarCategoria('xis')">Xis</button>
+        <button class="cat-item" onclick="filtrarCategoria('hamburguer')">Hambúrguer</button>
+        <button class="cat-item" onclick="filtrarCategoria('porcoes')">Porções</button>
+        <button class="cat-item" onclick="filtrarCategoria('bebidas')">Bebidas</button>
+    </nav>
+
+    <main class="menu-container" id="menu-lanches">
+        <div class="loading" style="text-align: center; padding: 40px; color: #717171;">Carregando cardápio...</div>
+    </main>
+
+    <div id="cart-bar" class="cart-bar hidden" onclick="abrirModalCarrinho()">
+        <div class="cart-info">
+            <span id="cart-qtd">0 itens</span>
+            <span id="cart-total">R$ 0,00</span>
+        </div>
+        <button class="btn-ver-carrinho">Ver sacola</button>
+    </div>
+
+    <div id="modal-sacola" class="modal-bg hidden" onclick="fecharModalCarrinho()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-height: 85vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: var(--cor-primaria);">Sua Sacola</h2>
+                <button onclick="fecharModalCarrinho()" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #999;">&times;</button>
+            </div>
+            
+            <div id="itens-sacola-container"></div>
+
+            <div style="display: flex; justify-content: space-between; font-weight: bold; margin: 25px 0; font-size: 1.1rem; border-top: 1px dashed #ddd; padding-top: 15px;">
+                <span>Total:</span>
+                <span id="total-sacola-modal">R$ 0,00</span>
+            </div>
+            <button onclick="finalizarPedido()" style="width: 100%; background: var(--cor-primaria); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;">Confirmar e Enviar Pedido</button>
+        </div>
+    </div>
+
+    <div id="modal-cadastro-usuario" class="modal-bg hidden">
+        <div class="modal-content">
+            <h2>Conclua seu Cadastro</h2>
+            <p>Precisamos destes dados para realizar a entrega do seu pedido.</p>
+            <form id="form-completar-cadastro">
+                <div class="form-group">
+                    <label>Telefone / WhatsApp:</label>
+                    <input type="tel" id="user-telefone" placeholder="(51) 99999-9999" required>
+                </div>
+                <div class="form-group">
+                    <label>Rua / Avenida:</label>
+                    <input type="text" id="user-rua" placeholder="Ex: Av. Bento Gonçalves" required>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;" class="form-group">
+                        <label>Nº:</label>
+                        <input type="text" id="user-numero" required>
+                    </div>
+                    <div style="flex: 2;" class="form-group">
+                        <label>Bairro:</label>
+                        <input type="text" id="user-bairro" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-salvar-cadastro">Salvar Cadastro e Continuar</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

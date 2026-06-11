@@ -1,0 +1,231 @@
+/* Paleta de Cores baseada na marca */
+:root {
+    --cor-primaria: #138342;  /* Verde do Coqueiro */
+    --cor-fundo: #f4f4f5;     /* Cinza claro estilo iFood */
+    --cor-card: #ffffff;
+    --cor-texto: #3e3e2f;
+    --cor-destaque: #e4b223;  /* Amarelo/Dourado para detalhes de preço */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    padding-bottom: 80px; /* Espaço para a barra do carrinho */
+}
+
+/* Header */
+header {
+    background-color: var(--cor-primaria);
+    color: white;
+    padding: 20px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    background: white;
+    padding: 5px;
+    border-radius: 50%;
+}
+
+.header-info h1 {
+    font-size: 1.2rem;
+}
+
+.header-info p {
+    font-size: 0.85rem;
+    color: #e2e2e2;
+}
+
+/* Categorias */
+.categories {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.categories::-webkit-scrollbar {
+    display: none; /* Esconde a barra no mobile */
+}
+
+.cat-item {
+    background: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    color: #666;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.cat-item.active {
+    background: var(--cor-primaria);
+    color: white;
+}
+
+/* Lista de Lanches (Estilo iFood Horizontal Card) */
+.menu-container {
+    padding: 10px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.lanche-card {
+    background: var(--cor-card);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.lanche-info {
+    flex: 1;
+    padding-right: 12px;
+}
+
+.lanche-info h3 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.lanche-info p {
+    font-size: 0.8rem;
+    color: #717171;
+    line-height: 1.2rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.lanche-preco {
+    font-weight: bold;
+    color: var(--cor-primaria);
+    margin-top: 8px;
+    font-size: 1.1rem;
+}
+
+.lanche-img-container {
+    position: relative;
+}
+
+.lanche-img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* Barra de Carrinho Fixo Inferior */
+.cart-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    height: 65px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+    z-index: 999;
+}
+
+.cart-info {
+    display: flex;
+    flex-direction: column;
+}
+
+#cart-qtd { font-size: 0.8rem; color: #717171; }
+#cart-total { font-weight: bold; font-size: 1.1rem; color: var(--cor-primaria); }
+
+.btn-ver-carrinho {
+    background: var(--cor-primaria);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.hidden { display: none !important; }
+
+/* Botão flutuante de adicionar (+) na foto */
+.btn-add-carrinho {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background: white;
+    color: var(--cor-primaria);
+    border: 1px solid #e2e2e2;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-add-carrinho:active {
+    transform: scale(0.9);
+    background-color: #f0f0f0;
+}
+
+/* ==========================================================================
+   ATUALIZAÇÃO: NOVOS MODAIS ISOLADOS (CARRINHO E CADASTRO)
+   ========================================================================== */
+.modal-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background: white; width: 90%; max-width: 420px;
+    padding: 25px; border-radius: 16px;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.15);
+}
+
+.modal-content h2 { font-size: 1.25rem; color: var(--cor-primaria); margin-bottom: 8px; }
+.modal-content p { font-size: 0.85rem; color: #666; margin-bottom: 20px; }
+
+.form-group { margin-bottom: 15px; text-align: left; }
+.form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--cor-texto); }
+.form-group input { width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem; color: var(--cor-texto); }
+
+.btn-salvar-cadastro {
+    width: 100%; background: var(--cor-primaria); color: white;
+    border: none; padding: 13px; border-radius: 8px;
+    font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem;
+}
