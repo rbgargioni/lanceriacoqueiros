@@ -5,29 +5,38 @@ const form = document.getElementById("form-cadastro");
 
 if (form) {
     form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Impede a página de recarregar
 
-        console.log("Tentando enviar um lanche de teste direto para o Firestore...");
+        // Coleta os valores reais digitados por você no formulário HTML
+        const nome = document.getElementById("nome").value;
+        const categoria = document.getElementById("categoria").value;
+        const preco = parseFloat(document.getElementById("preco").value);
+        const imagemUrl = document.getElementById("imagemUrl").value;
+        const descricao = document.getElementById("descricao").value;
+
+        // Validação preventiva simples para evitar dados corrompidos
+        if (!nome || !categoria || isNaN(preco)) {
+            alert("Por favor, preencha todos os campos corretamente.");
+            return;
+        }
 
         try {
-            // Enviando dados fixos para testar se as regras do banco estão abertas
+            // Envia os dados dinâmicos do formulário para a coleção 'lanches'
             const docRef = await addDoc(collection(db, "lanches"), {
-                nome: "Xis Salada Teste",
-                categoria: "xis",
-                preco: 25.90,
-                imagemUrl: "image_2c6f96.jpg",
-                descricao: "Ingredientes de teste para validação do banco de dados.",
+                nome: nome,
+                categoria: categoria,
+                preco: preco,
+                imagemUrl: imagemUrl,
+                descricao: descricao,
                 dataCriacao: new Date()
             });
 
-            console.log("Sucesso completo! ID gerado no Firestore:", docRef.id);
-            alert("Conexão com o banco funcionando! Lanche cadastrado com ID: " + docRef.id);
-            form.reset();
+            alert("Sucesso! Lanche cadastrado com o ID: " + docRef.id);
+            form.reset(); // Limpa os campos para o próximo cadastro
             
         } catch (error) {
-            // Este log vai mostrar a mensagem vermelha exata do Firebase no console
-            console.error("ERRO CRÍTICO ENCONTRADO NO FIRESTORE:", error);
-            alert("Falha na gravação. Olhe a linha vermelha no console (F12) para ver o motivo.");
+            console.error("Erro ao salvar no banco: ", error);
+            alert("Ocorreu um erro ao salvar o lanche. Verifique o console.");
         }
     });
 }
