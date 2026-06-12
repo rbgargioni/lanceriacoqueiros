@@ -33,189 +33,187 @@ onAuthStateChanged(auth, async (user) => {
         usuarioLogado = user;
         if (btnLogin) btnLogin.classList.add("hidden");
         if (userInfo) {
-            userInfo.classList.remove("hidden");
             userInfo.innerText = `Olá, ${user.displayName.split(' ')[0]}`;
+            userInfo.classList.remove("hidden");
         }
-        
-        // Verifica se o perfil de entrega já existe na coleção 'usuarios'
-        const userDocRef = doc(db, "usuarios", user.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (!userDoc.exists()) {
-            document.getElementById("modal-cadastro-usuario").classList.remove("hidden");
-        }
+        await verificarEcriarUsuario(user);
     } else {
         usuarioLogado = null;
         if (btnLogin) btnLogin.classList.remove("hidden");
-        if (userInfo) userInfo.classList.add("hidden");
+        if (userInfo) {
+            userInfo.innerText = "";
+            userInfo.classList.add("hidden");
+        }
     }
 });
 
-// Manipulador do formulário complementar baseado na sua estrutura do Firestore
-const formCadastro = document.getElementById("form-completar-cadastro");
-if (formCadastro) {
-    formCadastro.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        if (!usuarioLogado) return;
+async function verificarEcriarUsuario(user) {
+    const userRef = doc(db, "clientes", user.uid);
+    const docSnap = await getDoc(userRef);
 
-        const telefone = document.getElementById("user-telefone").value || "";
-        const cidade = document.getElementById("user-cidade").value || "";
-        const bairro = document.getElementById("user-bairro").value || "";
-        const rua = document.getElementById("user-rua").value || "";
-        const numero = document.getElementById("user-numero").value || "";
-        const complemento = document.getElementById("user-complemento").value || ""; 
-
-        try {
-            // Salva os dados seguindo a sua estrutura exata de campos de endereço
-            await setDoc(doc(db, "usuarios", usuarioLogado.uid), {
-                nome: usuarioLogado.displayName,
-                email: usuarioLogado.email,
-                telefone: telefone,
-                isAdmin: false,
-                endereco: {
-                    cidade: cidade,
-                    bairro: bairro,
-                    rua: rua,
-                    numero: numero,
-                    complemento: complemento
-                }
-            });
-
-            document.getElementById("modal-cadastro-usuario").classList.add("hidden");
-            alert("Perfil de entrega configurado com sucesso!");
-        } catch (error) {
-            console.error("Erro ao salvar cadastro do cliente:", error);
-            alert("Erro ao salvar no banco. Verifique o console.");
+    if (!docSnap.exists()) {
+        await setDoc(userRef, {
+            nome: user.displayName,
+            email: user.email,
+            telefone: "",
+            endereco: {
+                cidade: "Porto Alegre",
+                bairro: "",
+                rua: "",
+                numero: "",
+                complemento: ""
+            },
+            dataCadastro: new Date()
+        });
+    } else {
+        const dadosPreenchidos = docSnap.data();
+        if (dadosPreenchidos.telefone) {
+            document.getElementById("user-telefone").value = dadosPreenchidos.telefone;
+            document.getElementById("user-cidade").value = dadosPreenchidos.endereco.cidade || "Porto Alegre";
+            document.getElementById("user-bairro").value = dadosPreenchidos.endereco.bairro || "";
+            document.getElementById("user-rua").value = dadosPreenchidos.endereco.rua || "";
+            document.getElementById("user-numero").value = dadosPreenchidos.endereco.numero || "";
+            document.getElementById("user-complemento").value = dadosPreenchidos.endereco.complemento || "";
         }
-    });
+    }
 }
 
 // ==========================================
-// RENDERIZADOR DO CARDÁPIO EM TEMPO REAL
+// ESCUTA SESSÃO CARDÁPIO EM TEMPO REAL
 // ==========================================
 function carregarCardapio() {
-    if (!menuContainer) return;
     const q = query(collection(db, "lanches"), orderBy("nome"));
     
     onSnapshot(q, (snapshot) => {
         listaLanches = [];
-        if (snapshot.empty) {
-            menuContainer.innerHTML = `<div style="text-align:center; padding:30px; color:#717171;">Cardápio indisponível no momento.</div>`;
-            return;
-        }
-
         snapshot.forEach((doc) => {
             listaLanches.push({ id: doc.id, ...doc.data() });
         });
 
-        renderizarLanches(listaLanches);
-    }, (error) => {
-        console.error("Erro ao carregar lanches do Firestore:", error);
+        // Mantém a exibição correta caso o usuário já esteja em uma categoria de lanches
+        const botaoAtivo = document.querySelector(".cat-item.active");
+        if (botaoAtivo) {
+            const cat = botaoAtivo.getAttribute("onclick").match(/'([^']+)'/)[1];
+            if (cat !== 'sobre') {
+                const lanchesFiltrados = listaLanches.filter(lanche => lanche.categoria === cat);
+                renderizarProdutos(lanchesFiltrados);
+            }
+        }
     });
 }
 
-function renderizarLanches(lanches) {
-    if (!menuContainer) return;
+function renderizarProdutos(produtos) {
     menuContainer.innerHTML = "";
-    lanches.forEach(lanche => {
-        const precoNum = typeof lanche.preco === 'number' ? lanche.preco : parseFloat(lanche.preco) || 0;
-        const card = document.createElement("div");
-        card.classList.add("lanche-card");
-        card.innerHTML = `
-            <div class="lanche-info">
-                <h3>${lanche.nome}</h3>
-                <p>${lanche.descricao}</p>
-                <div class="lanche-preco">R$ ${precoNum.toFixed(2).replace('.', ',')}</div>
-            </div>
-            <div class="lanche-img-container">
-                <img src="${lanche.imagemUrl}" alt="${lanche.nome}" class="lanche-img" onerror="this.src='image_2c6f96.jpg'">
-                <button class="btn-add-carrinho" data-id="${lanche.id}">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </div>
-        `;
-        menuContainer.appendChild(card);
-    });
-    adicionarEventosBotoes();
-}
 
-// ==========================================
-// GERENCIADOR LÓGICO DO CARRINHO
-// ==========================================
-function adicionarEventosBotoes() {
-    document.querySelectorAll(".btn-add-carrinho").forEach(botao => {
-        botao.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const lancheId = e.currentTarget.getAttribute("data-id");
-            adicionarAoCarrinho(lancheId);
-        });
-    });
-}
-
-function adicionarAoCarrinho(id) {
-    const lanche = listaLanches.find(item => item.id === id);
-    if (!lanche) return;
-
-    const precoNum = typeof lanche.preco === 'number' ? lanche.preco : parseFloat(lanche.preco) || 0;
-    const itemNoCarrinho = carrinho.find(item => item.id === id);
-    if (itemNoCarrinho) {
-        itemNoCarrinho.quantidade += 1;
-    } else {
-        carrinho.push({ id: lanche.id, nome: lanche.nome, preco: precoNum, quantidade: 1 });
-    }
-    atualizarBarraCarrinho();
-}
-
-function atualizarBarraCarrinho() {
-    if (!cartBar) return;
-
-    if (carrinho.length === 0) {
-        cartBar.classList.add("hidden");
-        document.getElementById("modal-sacola").classList.add("hidden");
+    if (produtos.length === 0) {
+        menuContainer.innerHTML = `<p style="text-align:center; padding:30px; color:#999; font-size:0.95rem;">Nenhum produto cadastrado nesta categoria.</p>`;
         return;
     }
 
-    const totalItens = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
-    const valorTotal = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+    produtos.forEach((lanche) => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "menu-item";
+        itemDiv.style.display = "flex";
+        itemDiv.style.background = "white";
+        itemDiv.style.padding = "12px";
+        itemDiv.style.borderRadius = "12px";
+        itemDiv.style.marginBottom = "10px";
+        itemDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.03)";
+        itemDiv.style.gap = "12px";
 
-    cartQtd.innerText = `${totalItens} ${totalItens === 1 ? 'item' : 'itens'}`;
-    cartTotal.innerText = `R$ ${valorTotal.toFixed(2).replace('.', ',')}`;
-    
-    cartBar.classList.remove("hidden");
-    renderizarItensSacola();
+        itemDiv.innerHTML = `
+            <img src="${lanche.imagemUrl}" alt="${lanche.nome}" style="width:85px; height:85px; object-fit:cover; border-radius:8px;" onerror="this.src='logo.png'">
+            <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                    <h3 style="font-size:1rem; margin-bottom:4px; color:#333;">${lanche.nome}</h3>
+                    <p style="font-size:0.8rem; color:#777; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${lanche.descricao}</p>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                    <span style="font-weight:bold; color:var(--cor-primaria); font-size:0.95rem;">R$ ${lanche.preco.toFixed(2).replace('.', ',')}</span>
+                    <button class="btn-add-carrinho" onclick="adicionarAoCarrinho('${lanche.id}')" style="background:#f4f4f5; border:none; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--cor-primaria); cursor:pointer; font-weight:bold;"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+        `;
+        menuContainer.appendChild(itemDiv);
+    });
 }
 
 // ==========================================
-// INTERAÇÃO E FLUXO DOS MODAIS
+// GERENCIADOR DA SACOLA DE COMPRAS (CARRINHO)
 // ==========================================
-window.abrirModalCarrinho = function() {
-    document.getElementById("modal-sacola").classList.remove("hidden");
+window.adicionarAoCarrinho = function(id) {
+    const lanche = listaLanches.find(item => item.id === id);
+    if (!lanche) return;
+
+    const itemExistente = carrinho.find(item => item.id === id);
+
+    if (itemExistente) {
+        itemExistente.quantidade += 1;
+    } else {
+        carrinho.push({ ...lanche, quantidade: 1 });
+    }
+
+    atualizarBarraCarrinho();
 };
 
-window.fecharModalCarrinho = function() {
+function atualizarBarraCarrinho() {
+    const totalItens = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
+    const valorTotal = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+
+    if (totalItens > 0) {
+        cartQtd.innerText = totalItens;
+        cartTotal.innerText = `R$ ${valorTotal.toFixed(2).replace('.', ',')}`;
+        cartBar.classList.remove("hidden");
+    } else {
+        cartBar.classList.add("hidden");
+        fecharModalSacola();
+    }
+}
+
+// Controladores das Telas Modais da Sacola
+window.abrirModalSacola = function() {
+    document.getElementById("modal-sacola").classList.remove("hidden");
+    montarItensSacolaModal();
+};
+
+window.fecharModalSacola = function() {
     document.getElementById("modal-sacola").classList.add("hidden");
 };
 
-function renderizarItensSacola() {
-    const container = document.getElementById("itens-sacola-container");
-    if (!container) return;
-    container.innerHTML = "";
+window.abrirModalCadastro = function() {
+    fecharModalSacola();
+    document.getElementById("modal-cadastro").classList.remove("hidden");
+};
+
+window.fecharModalCadastro = function() {
+    document.getElementById("modal-cadastro").classList.add("hidden");
+};
+
+function montarItensSacolaModal() {
+    const containerItens = document.getElementById("itens-sacola-modal");
+    containerItens.innerHTML = "";
 
     carrinho.forEach(item => {
         const itemDiv = document.createElement("div");
-        itemDiv.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #f0f0f0;";
+        itemDiv.style.display = "flex";
+        itemDiv.style.justifyContent = "space-between";
+        itemDiv.style.alignItems = "center";
+        itemDiv.style.marginBottom = "12px";
+        itemDiv.style.borderBottom = "1px solid #f4f4f5";
+        itemDiv.style.paddingBottom = "8px";
+
         itemDiv.innerHTML = `
-            <div style="flex:1; text-align:left;">
-                <h4 style="font-size:0.95rem; margin-bottom:2px; color:var(--cor-texto); font-weight:600;">${item.nome}</h4>
-                <span style="color:var(--cor-primaria); font-weight:bold; font-size:0.9rem;">R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}</span>
+            <div style="flex:1; padding-right:10px;">
+                <h4 style="font-size:0.95rem; color:#333; margin-bottom:2px;">${item.nome}</h4>
+                <span style="font-size:0.85rem; color:var(--cor-primaria); font-weight:600;">R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}</span>
             </div>
-            <div style="display:flex; align-items:center; gap:12px;">
-                <button onclick="mudarQtd('${item.id}', -1)" style="border:1px solid #ccc; background:white; width:26px; height:26px; border-radius:6px; cursor:pointer; font-weight:bold; color:#555;">-</button>
-                <span style="font-weight:bold; font-size:0.9rem; min-width:15px; text-align:center;">${item.quantidade}</span>
-                <button onclick="mudarQtd('${item.id}', 1)" style="border:1px solid #ccc; background:white; width:26px; height:26px; border-radius:6px; cursor:pointer; font-weight:bold; color:#555;">+</button>
+            <div style="display:flex; align-items:center; gap:10px; background:#f4f4f5; padding:4px 10px; border-radius:20px;">
+                <button onclick="mudarQtd('${item.id}', -1)" style="background:none; border:none; font-weight:bold; color:#777; cursor:pointer; font-size:1rem; width:20px;">-</button>
+                <span style="font-size:0.9rem; font-weight:bold; min-width:15px; text-align:center;">${item.quantidade}</span>
+                <button onclick="mudarQtd('${item.id}', 1)" style="background:none; border:none; font-weight:bold; color:var(--cor-primaria); cursor:pointer; font-size:1rem; width:20px;">+</button>
             </div>
         `;
-        container.appendChild(itemDiv);
+        containerItens.appendChild(itemDiv);
     });
 
     const valorTotal = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
@@ -230,18 +228,73 @@ window.mudarQtd = function(id, valor) {
     if (item.quantidade <= 0) {
         carrinho = carrinho.filter(item => item.id !== id);
     }
+    
     atualizarBarraCarrinho();
+    if (carrinho.length > 0) montarItensSacolaModal();
 };
 
-window.finalizarPedido = function() {
-    if (!usuarioLogado) {
-        alert("Por favor, faça login com a conta Google antes de enviar seu pedido.");
-        return;
-    }
-    alert("Pedido enviado com sucesso para a produção!");
-    carrinho = [];
-    atualizarBarraCarrinho();
-};
+// ==========================================
+// COMPACTAÇÃO E ENVIO DO PEDIDO VIA WHATSAPP
+// ==========================================
+const formEndereco = document.getElementById("form-endereco");
+if (formEndereco) {
+    formEndereco.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!usuarioLogado) {
+            alert("Por favor, faça o login com o Google para concluir o seu pedido.");
+            return;
+        }
+
+        const telefone = document.getElementById("user-telefone").value;
+        const cidade = document.getElementById("user-cidade").value;
+        const bairro = document.getElementById("user-bairro").value;
+        const rua = document.getElementById("user-rua").value;
+        const numero = document.getElementById("user-numero").value;
+        const complemento = document.getElementById("user-complemento").value;
+
+        // 1. Salva de forma persistente os dados de entrega no Firestore do cliente
+        try {
+            await setDoc(doc(db, "clientes", usuarioLogado.uid), {
+                nome: usuarioLogado.displayName,
+                email: usuarioLogado.email,
+                telefone: telefone,
+                endereco: { cidade, bairro, rua, numero, complemento },
+                ultimoPedido: new Date()
+            }, { merge: true });
+        } catch (err) {
+            console.error("Erro ao guardar dados do endereço no Firebase:", err);
+        }
+
+        // 2. Monta o texto legível da mensagem para o WhatsApp da Lancheria
+        let textoPedido = `*🍔 NOVO PEDIDO - LANCHERIA COQUEIRO* \n\n`;
+        textoPedido += `*Cliente:* ${usuarioLogado.displayName}\n`;
+        textoPedido += `*Telefone:* ${telefone}\n\n`;
+        textoPedido += `--- *ITENS SOLICITADOS* ---\n`;
+
+        carrinho.forEach(item => {
+            textoPedido += `${item.quantidade}x _${item.nome}_ (R$ ${item.preco.toFixed(2).replace('.', ',')} un)\n`;
+        });
+
+        const valorTotal = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+        textoPedido += `\n*TOTAL DO PEDIDO:* R$ ${valorTotal.toFixed(2).replace('.', ',')}\n\n`;
+        textoPedido += `--- *ENDEREÇO DE ENTREGA* ---\n`;
+        textoPedido += `${rua}, Nº ${numero}\n`;
+        textoPedido += `Bairro: ${bairro} - ${cidade}\n`;
+        if (complemento) textoPedido += `Complemento: ${complemento}\n`;
+
+        // 3. Dispara a API oficial do WhatsApp
+        const numeroLancheria = "5551999999999"; // Substitua pelo número real da lancheria com DDD
+        const linkWhatsapp = `https://api.whatsapp.com/send?phone=${numeroLancheria}&text=${encodeURIComponent(textoPedido)}`;
+        
+        // Limpa a aplicação e redireciona
+        carrinho = [];
+        atualizarBarraCarrinho();
+        fecharModalCadastro();
+        
+        window.open(linkWhatsapp, "_blank");
+    });
+}
 
 // ==========================================
 // FILTRAGEM DINÂMICA DE CATEGORIAS
@@ -254,12 +307,21 @@ window.filtrarCategoria = function(categoria) {
         event.currentTarget.classList.add("active");
     }
 
-    if (categoria === 'todos') {
-        renderizarLanches(listaLanches);
-    } else {
-        const lanchesFiltrados = listaLanches.filter(l => l.categoria === categoria);
-        renderizarLanches(lanchesFiltrados);
+    const secaoSobre = document.getElementById("secao-sobre");
+
+    // Se clicar em "sobre", mostra o card institucional e limpa a lista de itens abaixo
+    if (categoria === 'sobre') {
+        if (secaoSobre) secaoSobre.style.display = "block";
+        menuContainer.innerHTML = "";
+        return;
     }
+
+    // Se escolher um cardápio (xis, hambúrguer, bebidas...), esconde a seção Sobre e filtra os itens
+    if (secaoSobre) secaoSobre.style.display = "none";
+    
+    const lanchesFiltrados = listaLanches.filter(lanche => lanche.categoria === categoria);
+    renderizarProdutos(lanchesFiltrados);
 };
 
+// Inicializa o app
 carregarCardapio();
