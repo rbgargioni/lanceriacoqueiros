@@ -311,7 +311,7 @@ if (formCadastro) {
             textoPedido += `\n💰 *Total Geral:* R$ ${vlrTotal.toFixed(2).replace('.', ',')}`;
 
             // Substitua pelo número oficial de atendimento da lancheria
-            const numeroLancheria = "5551999999999"; 
+            const numeroLancheria = "5551984779161"; 
             const linkWhatsapp = `https://api.whatsapp.com/send?phone=${numeroLancheria}&text=${encodeURIComponent(textoPedido)}`;
             
             // Limpezas pós sucesso
