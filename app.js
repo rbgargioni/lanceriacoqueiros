@@ -24,7 +24,7 @@ const carrinhoItensContainer = document.getElementById("carrinho-itens");
 const modalCartTotal = document.getElementById("modal-cart-total");
 
 // ==========================================================================
-// CONTROLADOR DE LOGINS E AUTENTICAÇÃO GOOGLE
+// AUTENTICAÇÃO GOOGLE E CHECAGEM DE CADASTRO NO FIRESTORE
 // ==========================================================================
 if (btnLogin) {
     btnLogin.addEventListener("click", async () => {
@@ -37,15 +37,17 @@ if (btnLogin) {
     });
 }
 
-// Observador do estado de autenticação
+// Observador do estado de autenticação (Dispara automaticamente ao logar/deslogar)
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         usuarioLogado = user;
         if (btnLogin) btnLogin.classList.add("hidden");
         if (userInfo) {
+            // Mostra o primeiro nome vindo da conta Google do usuário
             userInfo.innerText = `Olá, ${user.displayName.split(' ')[0]}`;
             userInfo.classList.remove("hidden");
         }
+        // Busca se o usuário já tem Telefone/Endereço salvos no Firestore
         await carregarDadosUsuarioExistente(user);
     } else {
         usuarioLogado = null;
@@ -57,13 +59,16 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
+// Função que puxa os dados adicionais de endereço usando o UID do Google
 async function carregarDadosUsuarioExistente(user) {
     try {
         const userDocRef = doc(db, "clientes", user.uid);
         const userDoc = await getDoc(userDocRef);
+        
         if (userDoc.exists()) {
             const dados = userDoc.data();
-            if (document.getElementById("user-nome")) document.getElementById("user-nome").value = dados.nome || "";
+            // Preenche automaticamente o formulário para o usuário não ter que digitar de novo
+            if (document.getElementById("user-nome")) document.getElementById("user-nome").value = dados.nome || user.displayName;
             if (document.getElementById("user-cpf")) document.getElementById("user-cpf").value = dados.cpf || "";
             if (document.getElementById("user-telefone")) document.getElementById("user-telefone").value = dados.telefone || "";
             if (document.getElementById("user-cidade")) document.getElementById("user-cidade").value = dados.cidade || "Porto Alegre";
@@ -72,6 +77,7 @@ async function carregarDadosUsuarioExistente(user) {
             if (document.getElementById("user-numero")) document.getElementById("user-numero").value = dados.numero || "";
             if (document.getElementById("user-complemento")) document.getElementById("user-complemento").value = dados.complemento || "";
         } else {
+            // Se for a primeira vez dele, apenas joga o nome do Google no campo de Nome
             if (document.getElementById("user-nome")) document.getElementById("user-nome").value = user.displayName || "";
         }
     } catch (error) {
@@ -79,7 +85,7 @@ async function carregarDadosUsuarioExistente(user) {
     }
 }
 
-// Modais - Funções Globais de Controle de Abertura/Fechamento
+// Modais - Funções de Controle de Exibição
 window.abrirModalCarrinho = function() {
     if (modalCarrinho) modalCarrinho.classList.remove("hidden");
     renderizarItensCarrinhoModal();
@@ -98,9 +104,8 @@ window.fecharModalCadastro = function() {
 };
 
 // ==========================================================================
-// INTEGRAÇÃO E RENDERIZAÇÃO DO CARDÁPIO E DO CARRINHO
+// RENDERIZAÇÃO DO CARDÁPIO ATRAVÉS DO FIRESTORE
 // ==========================================================================
-
 const q = query(collection(db, "lanches"), orderBy("nome", "asc"));
 onSnapshot(q, (snapshot) => {
     listaLanches = [];
@@ -201,7 +206,6 @@ function renderizarItensCarrinhoModal() {
         itemDiv.style.borderRadius = "8px";
         itemDiv.style.gap = "10px";
 
-        // Nova estrutura interna contendo a miniatura (.modal-lanche-thumb)
         itemDiv.innerHTML = `
             <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
                 <img src="${item.imagemUrl}" alt="${item.nome}" class="modal-lanche-thumb" onerror="this.src='logo.jpg'">
@@ -239,31 +243,35 @@ window.alterarQuantidade = function(id, delta) {
     }
 };
 
+// Ação do Botão Avançar dentro da Sacola
 if (btnAvancarPedido) {
     btnAvancarPedido.addEventListener("click", () => {
+        // REGRA DE SEGURANÇA: Se não estiver logado com Google, força o login primeiro
         if (!usuarioLogado) {
-            alert("Para prosseguir, você precisa se conectar com sua conta Google!");
+            alert("Para prosseguir com o seu pedido, você precisa se conectar com sua conta Google!");
             fecharModalCarrinho();
             if (btnLogin) btnLogin.click();
             return;
         }
+        // Se já está logado, fecha a sacola e abre o modal para confirmar/inserir telefone e endereço
         fecharModalCarrinho();
         abrirModalCadastro();
     });
 }
 
 // ==========================================================================
-// SUBMIT: PERSISTÊNCIA NO FIRESTORE E ENVIO DO WHATSAPP
+// SUBMIT DO FORMULÁRIO: VINCULA DADOS AO UID GOOGLE E ENVIA WHATSAPP
 // ==========================================================================
 if (formCadastro) {
     formCadastro.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         if (!usuarioLogado) {
-            alert("Erro: Você não está autenticado com o Google.");
+            alert("Erro: Você precisa estar autenticado com o Google.");
             return;
         }
 
+        // Montagem do Objeto mesclando ID do Google com inputs de Telefone/Endereço
         const dadosCliente = {
             uid: usuarioLogado.uid,
             nome: document.getElementById("user-nome").value,
@@ -274,15 +282,17 @@ if (formCadastro) {
             rua: document.getElementById("user-rua").value,
             numero: document.getElementById("user-numero").value,
             complemento: document.getElementById("user-complemento").value,
-            email: usuarioLogado.email,
-            salvoEm: new Date().toISOString()
+            email: usuarioLogado.email, // Puxado direto da conta Google
+            atualizadoEm: new Date().toISOString()
         };
 
         try {
+            // Salva ou atualiza os dados na coleção "clientes" com o ID fixo do Google
             await setDoc(doc(db, "clientes", usuarioLogado.uid), dadosCliente);
 
+            // Geração da mensagem de texto formatada para o WhatsApp
             let textoPedido = `*🍔 NOVO PEDIDO (LANCHERIA COQUEIRO)*\n\n`;
-            textoPedido += `*--- DADOS DO CLIENTE ---*\n`;
+            textoPedido += `*--- DADOS DE ENTREGA ---*\n`;
             textoPedido += `👤 *Nome:* ${dadosCliente.nome}\n`;
             textoPedido += `🆔 *CPF:* ${dadosCliente.cpf}\n`;
             textoPedido += `📞 *WhatsApp:* ${dadosCliente.telefone}\n`;
@@ -300,27 +310,27 @@ if (formCadastro) {
             const vlrTotal = carrinho.reduce((acc, item) => acc + (parseFloat(item.preco) * item.quantidade), 0);
             textoPedido += `\n💰 *Total Geral:* R$ ${vlrTotal.toFixed(2).replace('.', ',')}`;
 
+            // Substitua pelo número oficial de atendimento da lancheria
             const numeroLancheria = "5551999999999"; 
             const linkWhatsapp = `https://api.whatsapp.com/send?phone=${numeroLancheria}&text=${encodeURIComponent(textoPedido)}`;
             
+            // Limpezas pós sucesso
             carrinho = [];
             atualizarBarraCarrinho();
             fecharModalCadastro();
             renderizarCardapio(listaLanches);
             
-            alert("Cadastro salvo no banco e pedido enviado com sucesso!");
+            alert("Cadastro sincronizado e pedido enviado!");
             window.open(linkWhatsapp, "_blank");
 
         } catch (error) {
             console.error("Erro ao salvar dados no Firestore:", error);
-            alert("Ocorreu um erro ao salvar suas informações no banco de dados. Tente novamente.");
+            alert("Erro ao sincronizar suas informações com o banco de dados.");
         }
     });
 }
 
-// ==========================================================================
-// FILTRAGEM DINÂMICA DE CATEGORIAS
-// ==========================================================================
+// Filtragem de categorias por abas horizontais
 window.filtrarCategoria = function(categoria) {
     const botoes = document.querySelectorAll(".cat-item");
     botoes.forEach(btn => btn.classList.remove("active"));

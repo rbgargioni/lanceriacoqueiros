@@ -68,7 +68,7 @@ header {
 }
 
 .categorias-scroll::-webkit-scrollbar {
-    display: none; /* Oculta barra de rolagem no Chrome/Safari */
+    display: none;
 }
 
 .cat-item {
@@ -201,9 +201,7 @@ header {
     display: none !important;
 }
 
-/* ==========================================================================
-   NOVOS MODAIS ISOLADOS (CARRINHO E CADASTRO)
-   ========================================================================== */
+/* Modais Estrutural */
 .modal-bg {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -221,18 +219,16 @@ header {
 .modal-content h2 { font-size: 1.25rem; color: var(--cor-primaria); margin-bottom: 8px; }
 .modal-content p { font-size: 0.85rem; color: #666; }
 
-/* Formulários Internos do Modal de Cadastro */
+/* Form Group */
 .form-group { margin-bottom: 12px; }
 .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #444; }
 .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; }
 .form-group input:focus { border-color: var(--cor-primaria); outline: none; }
 
 .btn-finalizar { background: var(--cor-primaria); color: white; border: none; border-radius: 8px; font-weight: bold; width: 100%; padding: 12px; margin-top: 10px; cursor: pointer; }
-.btn-salvar-cadastro { background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; width: 100%; padding: 12px; margin-top: 15px; cursor: pointer; }
+.btn-salvar-cadastro { background: #138342; color: white; border: none; border-radius: 8px; font-weight: bold; width: 100%; padding: 12px; margin-top: 15px; cursor: pointer; }
 
-/* ==========================================================================
-   ATUALIZAÇÃO: CONTADOR INLINE REATIVO (ESTILO IFOOD)
-   ========================================================================== */
+/* Contador Inline */
 .carrinho-contador-inline {
     display: flex;
     align-items: center;
@@ -259,19 +255,10 @@ header {
     justify-content: center;
 }
 
-.btn-contador:active {
-    transform: scale(0.9);
-}
+.btn-contador:active { transform: scale(0.9); }
+.qtd-contador { font-weight: bold; font-size: 0.95rem; color: var(--cor-texto); min-width: 16px; text-align: center; }
 
-.qtd-contador {
-    font-weight: bold;
-    font-size: 0.95rem;
-    color: var(--cor-texto);
-    min-width: 16px;
-    text-align: center;
-}
-
-/* Nova miniatura para o modal da sacola */
+/* Foto Miniatura na Sacola */
 .modal-lanche-thumb {
     width: 45px;
     height: 45px;
