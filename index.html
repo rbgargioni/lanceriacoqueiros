@@ -23,48 +23,67 @@
         </div>
     </header>
 
-    <nav class="categories">
-        <button class="cat-item active" onclick="filtrarCategoria('todos')">Todos</button>
-        <button class="cat-item" onclick="filtrarCategoria('xis')">Xis</button>
-        <button class="cat-item" onclick="filtrarCategoria('hamburguer')">Hambúrguer</button>
-        <button class="cat-item" onclick="filtrarCategoria('porcoes')">Porções</button>
-        <button class="cat-item" onclick="filtrarCategoria('bebidas')">Bebidas</button>
-    </nav>
+    <div class="categorias-scroll">
+        <button class="cat-item active" onclick="filtrarCategoria('todos')">🔥 Todos</button>
+        <button class="cat-item" onclick="filtrarCategoria('xis')">🍔 Xis</button>
+        <button class="cat-item" onclick="filtrarCategoria('hamburguer')">🍟 Hambúrgueres</button>
+        <button class="cat-item" onclick="filtrarCategoria('bebidas')">🥤 Bebidas</button>
+        <button class="cat-item" onclick="filtrarCategoria('sobre')">ℹ️ Sobre Nós</button>
+    </div>
 
-    <main class="menu-container" id="menu-lanches">
-        <div class="loading" style="text-align: center; padding: 40px; color: #717171;">Carregando cardápio...</div>
+    <main style="padding: 15px; max-width: 600px; margin: 0 auto;">
+        <div id="secao-sobre" style="display: none; background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <h2 style="color: var(--cor-primaria); margin-bottom: 10px;">Lancheria Coqueiro</h2>
+            <p style="font-size: 0.95rem; line-height: 1.5; color: #555;">Servindo os melhores xis e hambúrgueres tradicionais de Porto Alegre desde 1977. Qualidade, sabor e tradição que passam de geração em geração.</p>
+        </div>
+
+        <div id="menu-lanches" class="lista-lanches">
+            </div>
     </main>
 
-    <div id="cart-bar" class="cart-bar hidden" onclick="abrirModalCarrinho()">
-        <div class="cart-info">
-            <span id="cart-qtd">0 itens</span>
-            <span id="cart-total">R$ 0,00</span>
+    <div id="cart-bar" class="hidden" onclick="abrirModalCarrinho()">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span id="cart-qtd" class="cart-badge">0</span>
+            <span>Ver sacola</span>
         </div>
-        <button class="btn-ver-carrinho">Ver sacola</button>
+        <span id="cart-total" style="font-weight: bold;">R$ 0,00</span>
     </div>
 
-    <div id="modal-sacola" class="modal-bg hidden" onclick="fecharModalCarrinho()">
-        <div class="modal-content" onclick="event.stopPropagation()" style="max-height: 85vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color: var(--cor-primaria);">Sua Sacola</h2>
-                <button onclick="fecharModalCarrinho()" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #999;">&times;</button>
-            </div>
-            
-            <div id="itens-sacola-container"></div>
-
-            <div style="display: flex; justify-content: space-between; font-weight: bold; margin: 25px 0; font-size: 1.1rem; border-top: 1px dashed #ddd; padding-top: 15px;">
-                <span>Total:</span>
-                <span id="total-sacola-modal">R$ 0,00</span>
-            </div>
-            <button onclick="finalizarPedido()" style="width: 100%; background: var(--cor-primaria); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;">Confirmar e Enviar Pedido</button>
-        </div>
-    </div>
-
-    <div id="modal-cadastro-usuario" class="modal-bg hidden">
+    <div id="modal-carrinho" class="modal-bg hidden">
         <div class="modal-content">
-            <h2>Conclua seu Cadastro</h2>
-            <p>Precisamos destes dados para realizar a entrega do seu pedido.</p>
-            <form id="form-completar-cadastro">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Sua Sacola</h2>
+                <button onclick="fecharModalCarrinho()" style="background:none; border:none; font-size: 1.2rem; cursor:pointer; color:#999;"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="carrinho-itens" style="max-height: 240px; overflow-y: auto; margin-bottom: 15px;">
+                </div>
+            <div style="border-top: 1px solid #eee; padding-top: 15px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem;">
+                    <span>Total:</span>
+                    <span id="modal-cart-total">R$ 0,00</span>
+                </div>
+            </div>
+            <button id="btn-avancar-pedido" class="btn-finalizar" style="width: 100%; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer;">Confirmar e Continuar</button>
+        </div>
+    </div>
+
+    <div id="modal-cadastro" class="modal-bg hidden">
+        <div class="modal-content" style="max-width: 460px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Dados de Entrega</h2>
+                <button type="button" onclick="fecharModalCadastro()" style="background:none; border:none; font-size: 1.2rem; cursor:pointer; color:#999;"><i class="fas fa-times"></i></button>
+            </div>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Precisamos dos seus dados para finalizar e emitir o envio do seu pedido com segurança.</p>
+            
+            <form id="form-cadastro">
+                <div class="form-group">
+                    <label>Nome Completo:</label>
+                    <input type="text" id="user-nome" required placeholder="Digite seu nome completo">
+                </div>
+                <div class="form-group">
+                    <label>CPF:</label>
+                    <input type="text" id="user-cpf" placeholder="000.000.000-00" required>
+                </div>
                 <div class="form-group">
                     <label>Telefone / WhatsApp:</label>
                     <input type="tel" id="user-telefone" placeholder="(51) 99999-9999" required>
@@ -91,7 +110,7 @@
                         <input type="text" id="user-complemento" placeholder="Apto, Bloco, Casa (Opcional)">
                     </div>
                 </div>
-                <button type="submit" class="btn-salvar-cadastro">Salvar Cadastro e Continuar</button>
+                <button type="submit" class="btn-salvar-cadastro">Salvar Cadastro e Enviar Pedido</button>
             </form>
         </div>
     </div>

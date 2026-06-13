@@ -15,19 +15,29 @@ const cartTotal = document.getElementById("cart-total");
 const btnLogin = document.getElementById("btn-login");
 const userInfo = document.getElementById("user-info");
 
-// ==========================================
-// CONTROLADOR DE LOGINS E DADOS DO CLIENTE
-// ==========================================
+// Elementos dos Modais
+const modalCarrinho = document.getElementById("modal-carrinho");
+const modalCadastro = document.getElementById("modal-cadastro");
+const formCadastro = document.getElementById("form-cadastro");
+const btnAvancarPedido = document.getElementById("btn-avancar-pedido");
+const carrinhoItensContainer = document.getElementById("carrinho-itens");
+const modalCartTotal = document.getElementById("modal-cart-total");
+
+// ==========================================================================
+// CONTROLADOR DE LOGINS E AUTENTICAÇÃO GOOGLE
+// ==========================================================================
 if (btnLogin) {
     btnLogin.addEventListener("click", async () => {
         try {
             await signInWithPopup(auth, googleProvider);
         } catch (error) {
             console.error("Erro na autenticação:", error);
+            alert("Falha ao autenticar com o Google.");
         }
     });
 }
 
+// Observador do estado de autenticação
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         usuarioLogado = user;
@@ -36,7 +46,7 @@ onAuthStateChanged(auth, async (user) => {
             userInfo.innerText = `Olá, ${user.displayName.split(' ')[0]}`;
             userInfo.classList.remove("hidden");
         }
-        await verificarEcriarUsuario(user);
+        await carregarDadosUsuarioExistente(user);
     } else {
         usuarioLogado = null;
         if (btnLogin) btnLogin.classList.remove("hidden");
@@ -47,90 +57,95 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-async function verificarEcriarUsuario(user) {
-    const userRef = doc(db, "clientes", user.uid);
-    const docSnap = await getDoc(userRef);
-
-    if (!docSnap.exists()) {
-        await setDoc(userRef, {
-            nome: user.displayName,
-            email: user.email,
-            telefone: "",
-            endereco: {
-                cidade: "Porto Alegre",
-                bairro: "",
-                rua: "",
-                numero: "",
-                complemento: ""
-            },
-            dataCadastro: new Date()
-        });
-    } else {
-        const dadosPreenchidos = docSnap.data();
-        if (dadosPreenchidos.telefone) {
-            document.getElementById("user-telefone").value = dadosPreenchidos.telefone;
-            document.getElementById("user-cidade").value = dadosPreenchidos.endereco.cidade || "Porto Alegre";
-            document.getElementById("user-bairro").value = dadosPreenchidos.endereco.bairro || "";
-            document.getElementById("user-rua").value = dadosPreenchidos.endereco.rua || "";
-            document.getElementById("user-numero").value = dadosPreenchidos.endereco.numero || "";
-            document.getElementById("user-complemento").value = dadosPreenchidos.endereco.complemento || "";
+async function carregarDadosUsuarioExistente(user) {
+    try {
+        const userDocRef = doc(db, "clientes", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+            const dados = userDoc.data();
+            if (document.getElementById("user-nome")) document.getElementById("user-nome").value = dados.nome || "";
+            if (document.getElementById("user-cpf")) document.getElementById("user-cpf").value = dados.cpf || "";
+            if (document.getElementById("user-telefone")) document.getElementById("user-telefone").value = dados.telefone || "";
+            if (document.getElementById("user-cidade")) document.getElementById("user-cidade").value = dados.cidade || "Porto Alegre";
+            if (document.getElementById("user-bairro")) document.getElementById("user-bairro").value = dados.bairro || "";
+            if (document.getElementById("user-rua")) document.getElementById("user-rua").value = dados.rua || "";
+            if (document.getElementById("user-numero")) document.getElementById("user-numero").value = dados.numero || "";
+            if (document.getElementById("user-complemento")) document.getElementById("user-complemento").value = dados.complemento || "";
+        } else {
+            if (document.getElementById("user-nome")) document.getElementById("user-nome").value = user.displayName || "";
         }
+    } catch (error) {
+        console.error("Erro ao carregar dados salvos do Firestore:", error);
     }
 }
 
-// ==========================================
-// ESCUTA SESSÃO CARDÁPIO EM TEMPO REAL
-// ==========================================
-function carregarCardapio() {
-    const q = query(collection(db, "lanches"), orderBy("nome"));
-    
-    onSnapshot(q, (snapshot) => {
-        listaLanches = [];
-        snapshot.forEach((doc) => {
-            listaLanches.push({ id: doc.id, ...doc.data() });
-        });
+// Modais - Funções Globais de Controle de Abertura/Fechamento
+window.abrirModalCarrinho = function() {
+    if (modalCarrinho) modalCarrinho.classList.remove("hidden");
+    renderizarItensCarrinhoModal();
+};
 
-        // Mantém a exibição correta caso o usuário já esteja em uma categoria de lanches
-        const botaoAtivo = document.querySelector(".cat-item.active");
-        if (botaoAtivo) {
-            const cat = botaoAtivo.getAttribute("onclick").match(/'([^']+)'/)[1];
-            if (cat !== 'sobre') {
-                const lanchesFiltrados = listaLanches.filter(lanche => lanche.categoria === cat);
-                renderizarProdutos(lanchesFiltrados);
-            }
-        }
+window.fecharModalCarrinho = function() {
+    if (modalCarrinho) modalCarrinho.classList.add("hidden");
+};
+
+window.abrirModalCadastro = function() {
+    if (modalCadastro) modalCadastro.classList.remove("hidden");
+};
+
+window.fecharModalCadastro = function() {
+    if (modalCadastro) modalCadastro.classList.add("hidden");
+};
+
+// ==========================================================================
+// INTEGRAÇÃO E RENDERIZAÇÃO DO CARDÁPIO E DO CARRINHO
+// ==========================================================================
+
+const q = query(collection(db, "lanches"), orderBy("nome", "asc"));
+onSnapshot(q, (snapshot) => {
+    listaLanches = [];
+    snapshot.forEach(doc => {
+        listaLanches.push({ id: doc.id, ...doc.data() });
     });
-}
+    renderizarCardapio(listaLanches);
+});
 
-function renderizarProdutos(produtos) {
+function renderizarCardapio(lanches) {
+    if (!menuContainer) return;
     menuContainer.innerHTML = "";
-
-    if (produtos.length === 0) {
-        menuContainer.innerHTML = `<p style="text-align:center; padding:30px; color:#999; font-size:0.95rem;">Nenhum produto cadastrado nesta categoria.</p>`;
-        return;
-    }
-
-    produtos.forEach((lanche) => {
+    
+    lanches.forEach(lanche => {
         const itemDiv = document.createElement("div");
-        itemDiv.className = "menu-item";
-        itemDiv.style.display = "flex";
-        itemDiv.style.background = "white";
-        itemDiv.style.padding = "12px";
-        itemDiv.style.borderRadius = "12px";
-        itemDiv.style.marginBottom = "10px";
-        itemDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.03)";
-        itemDiv.style.gap = "12px";
-
-        itemDiv.innerHTML = `
-            <img src="${lanche.imagemUrl}" alt="${lanche.nome}" style="width:85px; height:85px; object-fit:cover; border-radius:8px;" onerror="this.src='logo.png'">
-            <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between;">
-                <div>
-                    <h3 style="font-size:1rem; margin-bottom:4px; color:#333;">${lanche.nome}</h3>
-                    <p style="font-size:0.8rem; color:#777; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${lanche.descricao}</p>
+        itemDiv.className = "lanche-item";
+        itemDiv.setAttribute("data-categoria", lanche.categoria);
+        
+        const itemNoCarrinho = carrinho.find(item => item.id === lanche.id);
+        let secaoAcaoHTML = "";
+        
+        if (itemNoCarrinho) {
+            secaoAcaoHTML = `
+                <div class="carrinho-contador-inline">
+                    <button onclick="alterarQuantidade('${lanche.id}', -1)" class="btn-contador">-</button>
+                    <span class="qtd-contador">${itemNoCarrinho.quantidade}</span>
+                    <button onclick="alterarQuantidade('${lanche.id}', 1)" class="btn-contador">+</button>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
-                    <span style="font-weight:bold; color:var(--cor-primaria); font-size:0.95rem;">R$ ${lanche.preco.toFixed(2).replace('.', ',')}</span>
-                    <button class="btn-add-carrinho" onclick="adicionarAoCarrinho('${lanche.id}')" style="background:#f4f4f5; border:none; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--cor-primaria); cursor:pointer; font-weight:bold;"><i class="fas fa-plus"></i></button>
+            `;
+        } else {
+            secaoAcaoHTML = `
+                <button class="btn-add-carrinho" onclick="adicionarAoCarrinho('${lanche.id}')">
+                    <i class="fas fa-plus"></i> Adicionar
+                </button>
+            `;
+        }
+        
+        itemDiv.innerHTML = `
+            <img src="${lanche.imagemUrl}" alt="${lanche.nome}" class="lanche-img" onerror="this.src='logo.jpg'">
+            <div class="lanche-detalhes">
+                <h3 class="lanche-nome">${lanche.nome}</h3>
+                <p class="lanche-descricao">${lanche.descricao}</p>
+                <div class="lanche-preco-acao">
+                    <span class="lanche-preco">R$ ${parseFloat(lanche.preco).toFixed(2).replace('.', ',')}</span>
+                    ${secaoAcaoHTML}
                 </div>
             </div>
         `;
@@ -138,60 +153,42 @@ function renderizarProdutos(produtos) {
     });
 }
 
-// ==========================================
-// GERENCIADOR DA SACOLA DE COMPRAS (CARRINHO)
-// ==========================================
 window.adicionarAoCarrinho = function(id) {
-    const lanche = listaLanches.find(item => item.id === id);
+    const lanche = listaLanches.find(l => l.id === id);
     if (!lanche) return;
 
     const itemExistente = carrinho.find(item => item.id === id);
-
     if (itemExistente) {
         itemExistente.quantidade += 1;
     } else {
         carrinho.push({ ...lanche, quantidade: 1 });
     }
-
     atualizarBarraCarrinho();
+    renderizarCardapio(listaLanches);
 };
 
 function atualizarBarraCarrinho() {
-    const totalItens = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
-    const valorTotal = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+    const qtdTotal = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
+    const vlrTotal = carrinho.reduce((acc, item) => acc + (parseFloat(item.preco) * item.quantidade), 0);
 
-    if (totalItens > 0) {
-        cartQtd.innerText = totalItens;
-        cartTotal.innerText = `R$ ${valorTotal.toFixed(2).replace('.', ',')}`;
-        cartBar.classList.remove("hidden");
+    if (qtdTotal > 0) {
+        if (cartBar) cartBar.classList.remove("hidden");
+        if (cartQtd) cartQtd.innerText = qtdTotal;
+        if (cartTotal) cartTotal.innerText = `R$ ${vlrTotal.toFixed(2).replace('.', ',')}`;
     } else {
-        cartBar.classList.add("hidden");
-        fecharModalSacola();
+        if (cartBar) cartBar.classList.add("hidden");
     }
 }
 
-// Controladores das Telas Modais da Sacola
-window.abrirModalSacola = function() {
-    document.getElementById("modal-sacola").classList.remove("hidden");
-    montarItensSacolaModal();
-};
-
-window.fecharModalSacola = function() {
-    document.getElementById("modal-sacola").classList.add("hidden");
-};
-
-window.abrirModalCadastro = function() {
-    fecharModalSacola();
-    document.getElementById("modal-cadastro").classList.remove("hidden");
-};
-
-window.fecharModalCadastro = function() {
-    document.getElementById("modal-cadastro").classList.add("hidden");
-};
-
-function montarItensSacolaModal() {
-    const containerItens = document.getElementById("itens-sacola-modal");
-    containerItens.innerHTML = "";
+function renderizarItensCarrinhoModal() {
+    if (!carrinhoItensContainer) return;
+    carrinhoItensContainer.innerHTML = "";
+    
+    if (carrinho.length === 0) {
+        carrinhoItensContainer.innerHTML = "<p style='text-align:center; color:#888; padding: 20px;'>Seu carrinho está vazio.</p>";
+        if (modalCartTotal) modalCartTotal.innerText = "R$ 0,00";
+        return;
+    }
 
     carrinho.forEach(item => {
         const itemDiv = document.createElement("div");
@@ -199,106 +196,131 @@ function montarItensSacolaModal() {
         itemDiv.style.justifyContent = "space-between";
         itemDiv.style.alignItems = "center";
         itemDiv.style.marginBottom = "12px";
-        itemDiv.style.borderBottom = "1px solid #f4f4f5";
-        itemDiv.style.paddingBottom = "8px";
+        itemDiv.style.background = "#f9f9f9";
+        itemDiv.style.padding = "8px 12px";
+        itemDiv.style.borderRadius = "8px";
+        itemDiv.style.gap = "10px";
 
+        // Nova estrutura interna contendo a miniatura (.modal-lanche-thumb)
         itemDiv.innerHTML = `
-            <div style="flex:1; padding-right:10px;">
-                <h4 style="font-size:0.95rem; color:#333; margin-bottom:2px;">${item.nome}</h4>
-                <span style="font-size:0.85rem; color:var(--cor-primaria); font-weight:600;">R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}</span>
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                <img src="${item.imagemUrl}" alt="${item.nome}" class="modal-lanche-thumb" onerror="this.src='logo.jpg'">
+                <div>
+                    <h4 style="margin:0; font-size:0.95rem;">${item.nome}</h4>
+                    <small style="color:#777;">R$ ${parseFloat(item.preco).toFixed(2).replace('.', ',')} x ${item.quantidade}</small>
+                </div>
             </div>
-            <div style="display:flex; align-items:center; gap:10px; background:#f4f4f5; padding:4px 10px; border-radius:20px;">
-                <button onclick="mudarQtd('${item.id}', -1)" style="background:none; border:none; font-weight:bold; color:#777; cursor:pointer; font-size:1rem; width:20px;">-</button>
-                <span style="font-size:0.9rem; font-weight:bold; min-width:15px; text-align:center;">${item.quantidade}</span>
-                <button onclick="mudarQtd('${item.id}', 1)" style="background:none; border:none; font-weight:bold; color:var(--cor-primaria); cursor:pointer; font-size:1rem; width:20px;">+</button>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button onclick="alterarQuantidade('${item.id}', -1)" style="border:none; background:#ddd; padding:2px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">-</button>
+                <span style="font-weight:bold; font-size:0.9rem;">${item.quantidade}</span>
+                <button onclick="alterarQuantidade('${item.id}', 1)" style="border:none; background:#ddd; padding:2px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">+</button>
             </div>
         `;
-        containerItens.appendChild(itemDiv);
+        carrinhoItensContainer.appendChild(itemDiv);
     });
 
-    const valorTotal = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
-    document.getElementById("total-sacola-modal").innerText = `R$ ${valorTotal.toFixed(2).replace('.', ',')}`;
+    const vlrTotal = carrinho.reduce((acc, item) => acc + (parseFloat(item.preco) * item.quantidade), 0);
+    if (modalCartTotal) modalCartTotal.innerText = `R$ ${vlrTotal.toFixed(2).replace('.', ',')}`;
 }
 
-window.mudarQtd = function(id, valor) {
+window.alterarQuantidade = function(id, delta) {
     const item = carrinho.find(item => item.id === id);
     if (!item) return;
 
-    item.quantidade += valor;
+    item.quantidade += delta;
     if (item.quantidade <= 0) {
         carrinho = carrinho.filter(item => item.id !== id);
     }
-    
     atualizarBarraCarrinho();
-    if (carrinho.length > 0) montarItensSacolaModal();
+    renderizarCardapio(listaLanches);
+    
+    if (modalCarrinho && !modalCarrinho.classList.contains("hidden")) {
+        renderizarItensCarrinhoModal();
+    }
 };
 
-// ==========================================
-// COMPACTAÇÃO E ENVIO DO PEDIDO VIA WHATSAPP
-// ==========================================
-const formEndereco = document.getElementById("form-endereco");
-if (formEndereco) {
-    formEndereco.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
+if (btnAvancarPedido) {
+    btnAvancarPedido.addEventListener("click", () => {
         if (!usuarioLogado) {
-            alert("Por favor, faça o login com o Google para concluir o seu pedido.");
+            alert("Para prosseguir, você precisa se conectar com sua conta Google!");
+            fecharModalCarrinho();
+            if (btnLogin) btnLogin.click();
             return;
         }
-
-        const telefone = document.getElementById("user-telefone").value;
-        const cidade = document.getElementById("user-cidade").value;
-        const bairro = document.getElementById("user-bairro").value;
-        const rua = document.getElementById("user-rua").value;
-        const numero = document.getElementById("user-numero").value;
-        const complemento = document.getElementById("user-complemento").value;
-
-        // 1. Salva de forma persistente os dados de entrega no Firestore do cliente
-        try {
-            await setDoc(doc(db, "clientes", usuarioLogado.uid), {
-                nome: usuarioLogado.displayName,
-                email: usuarioLogado.email,
-                telefone: telefone,
-                endereco: { cidade, bairro, rua, numero, complemento },
-                ultimoPedido: new Date()
-            }, { merge: true });
-        } catch (err) {
-            console.error("Erro ao guardar dados do endereço no Firebase:", err);
-        }
-
-        // 2. Monta o texto legível da mensagem para o WhatsApp da Lancheria
-        let textoPedido = `*🍔 NOVO PEDIDO - LANCHERIA COQUEIRO* \n\n`;
-        textoPedido += `*Cliente:* ${usuarioLogado.displayName}\n`;
-        textoPedido += `*Telefone:* ${telefone}\n\n`;
-        textoPedido += `--- *ITENS SOLICITADOS* ---\n`;
-
-        carrinho.forEach(item => {
-            textoPedido += `${item.quantidade}x _${item.nome}_ (R$ ${item.preco.toFixed(2).replace('.', ',')} un)\n`;
-        });
-
-        const valorTotal = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
-        textoPedido += `\n*TOTAL DO PEDIDO:* R$ ${valorTotal.toFixed(2).replace('.', ',')}\n\n`;
-        textoPedido += `--- *ENDEREÇO DE ENTREGA* ---\n`;
-        textoPedido += `${rua}, Nº ${numero}\n`;
-        textoPedido += `Bairro: ${bairro} - ${cidade}\n`;
-        if (complemento) textoPedido += `Complemento: ${complemento}\n`;
-
-        // 3. Dispara a API oficial do WhatsApp
-        const numeroLancheria = "5551999999999"; // Substitua pelo número real da lancheria com DDD
-        const linkWhatsapp = `https://api.whatsapp.com/send?phone=${numeroLancheria}&text=${encodeURIComponent(textoPedido)}`;
-        
-        // Limpa a aplicação e redireciona
-        carrinho = [];
-        atualizarBarraCarrinho();
-        fecharModalCadastro();
-        
-        window.open(linkWhatsapp, "_blank");
+        fecharModalCarrinho();
+        abrirModalCadastro();
     });
 }
 
-// ==========================================
+// ==========================================================================
+// SUBMIT: PERSISTÊNCIA NO FIRESTORE E ENVIO DO WHATSAPP
+// ==========================================================================
+if (formCadastro) {
+    formCadastro.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!usuarioLogado) {
+            alert("Erro: Você não está autenticado com o Google.");
+            return;
+        }
+
+        const dadosCliente = {
+            uid: usuarioLogado.uid,
+            nome: document.getElementById("user-nome").value,
+            cpf: document.getElementById("user-cpf").value,
+            telefone: document.getElementById("user-telefone").value,
+            cidade: document.getElementById("user-cidade").value,
+            bairro: document.getElementById("user-bairro").value,
+            rua: document.getElementById("user-rua").value,
+            numero: document.getElementById("user-numero").value,
+            complemento: document.getElementById("user-complemento").value,
+            email: usuarioLogado.email,
+            salvoEm: new Date().toISOString()
+        };
+
+        try {
+            await setDoc(doc(db, "clientes", usuarioLogado.uid), dadosCliente);
+
+            let textoPedido = `*🍔 NOVO PEDIDO (LANCHERIA COQUEIRO)*\n\n`;
+            textoPedido += `*--- DADOS DO CLIENTE ---*\n`;
+            textoPedido += `👤 *Nome:* ${dadosCliente.nome}\n`;
+            textoPedido += `🆔 *CPF:* ${dadosCliente.cpf}\n`;
+            textoPedido += `📞 *WhatsApp:* ${dadosCliente.telefone}\n`;
+            textoPedido += `📍 *Endereço:* ${dadosCliente.rua}, Nº ${dadosCliente.numero}\n`;
+            textoPedido += `🏘️ *Bairro:* ${dadosCliente.bairro} - ${dadosCliente.cidade}\n`;
+            if (dadosCliente.complemento) {
+                textoPedido += `🏢 *Complemento:* ${dadosCliente.complemento}\n`;
+            }
+            textoPedido += `\n*--- ITENS DO PEDIDO ---*\n`;
+
+            carrinho.forEach(item => {
+                textoPedido += `▪️ ${item.quantidade}x ${item.nome} (R$ ${parseFloat(item.preco).toFixed(2).replace('.', ',')} cada)\n`;
+            });
+
+            const vlrTotal = carrinho.reduce((acc, item) => acc + (parseFloat(item.preco) * item.quantidade), 0);
+            textoPedido += `\n💰 *Total Geral:* R$ ${vlrTotal.toFixed(2).replace('.', ',')}`;
+
+            const numeroLancheria = "5551999999999"; 
+            const linkWhatsapp = `https://api.whatsapp.com/send?phone=${numeroLancheria}&text=${encodeURIComponent(textoPedido)}`;
+            
+            carrinho = [];
+            atualizarBarraCarrinho();
+            fecharModalCadastro();
+            renderizarCardapio(listaLanches);
+            
+            alert("Cadastro salvo no banco e pedido enviado com sucesso!");
+            window.open(linkWhatsapp, "_blank");
+
+        } catch (error) {
+            console.error("Erro ao salvar dados no Firestore:", error);
+            alert("Ocorreu um erro ao salvar suas informações no banco de dados. Tente novamente.");
+        }
+    });
+}
+
+// ==========================================================================
 // FILTRAGEM DINÂMICA DE CATEGORIAS
-// ==========================================
+// ==========================================================================
 window.filtrarCategoria = function(categoria) {
     const botoes = document.querySelectorAll(".cat-item");
     botoes.forEach(btn => btn.classList.remove("active"));
@@ -309,19 +331,18 @@ window.filtrarCategoria = function(categoria) {
 
     const secaoSobre = document.getElementById("secao-sobre");
 
-    // Se clicar em "sobre", mostra o card institucional e limpa a lista de itens abaixo
     if (categoria === 'sobre') {
         if (secaoSobre) secaoSobre.style.display = "block";
         menuContainer.innerHTML = "";
         return;
     }
 
-    // Se escolher um cardápio (xis, hambúrguer, bebidas...), esconde a seção Sobre e filtra os itens
     if (secaoSobre) secaoSobre.style.display = "none";
-    
-    const lanchesFiltrados = listaLanches.filter(lanche => lanche.categoria === categoria);
-    renderizarProdutos(lanchesFiltrados);
-};
 
-// Inicializa o app
-carregarCardapio();
+    if (categoria === 'todos') {
+        renderizarCardapio(listaLanches);
+    } else {
+        const filtrados = listaLanches.filter(l => l.categoria === categoria);
+        renderizarCardapio(filtrados);
+    }
+};

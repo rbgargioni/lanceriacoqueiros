@@ -39,160 +39,130 @@ header {
 }
 
 .logo {
-    width: 50px;
-    height: 50px;
-    object-fit: contain;
-    background: white;
-    padding: 5px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
 }
 
 .header-info h1 {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
+    font-weight: 700;
 }
 
 .header-info p {
     font-size: 0.85rem;
-    color: #e2e2e2;
+    opacity: 0.9;
+    margin-top: 2px;
 }
 
-/* Categorias */
-.categories {
+/* Categorias Horizontais com Scroll */
+.categorias-scroll {
     display: flex;
-    gap: 10px;
-    padding: 15px;
     overflow-x: auto;
+    padding: 15px 10px;
+    gap: 10px;
+    scroll-behavior: smooth;
     white-space: nowrap;
 }
 
-.categories::-webkit-scrollbar {
-    display: none; /* Esconde a barra no mobile */
+.categorias-scroll::-webkit-scrollbar {
+    display: none; /* Oculta barra de rolagem no Chrome/Safari */
 }
 
 .cat-item {
-    background: white;
-    border: none;
+    background-color: var(--cor-card);
+    color: var(--cor-texto);
+    border: 1px solid #e2e2e6;
     padding: 8px 16px;
     border-radius: 20px;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: #666;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .cat-item.active {
-    background: var(--cor-primaria);
+    background-color: var(--cor-primaria);
     color: white;
+    border-color: var(--cor-primaria);
 }
 
-/* Lista de Lanches (Estilo iFood Horizontal Card) */
-.menu-container {
-    padding: 10px 15px;
+/* Lista de Lanches */
+.lista-lanches {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.lanche-card {
-    background: var(--cor-card);
+.lanche-item {
+    background-color: var(--cor-card);
     border-radius: 12px;
     padding: 12px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.lanche-info {
+.lanche-img {
+    width: 90px;
+    height: 90px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.lanche-detalhes {
     flex: 1;
-    padding-right: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-.lanche-info h3 {
+.lanche-nome {
     font-size: 1rem;
-    margin-bottom: 5px;
+    font-weight: 600;
+    color: #1a1a1a;
 }
 
-.lanche-info p {
-    font-size: 0.8rem;
-    color: #717171;
-    line-height: 1.2rem;
+.lanche-descricao {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 4px;
+    line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 
-.lanche-preco {
-    font-weight: bold;
-    color: var(--cor-primaria);
-    margin-top: 8px;
-    font-size: 1.1rem;
-}
-
-.lanche-img-container {
-    position: relative;
-}
-
-.lanche-img {
-    width: 90px;
-    height: 90px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-/* Barra de Carrinho Fixo Inferior */
-.cart-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    height: 65px;
+.lanche-preco-acao {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
-    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
-    z-index: 999;
+    margin-top: 8px;
 }
 
-.cart-info {
-    display: flex;
-    flex-direction: column;
+.lanche-preco {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--cor-texto);
 }
 
-#cart-qtd { font-size: 0.8rem; color: #717171; }
-#cart-total { font-weight: bold; font-size: 1.1rem; color: var(--cor-primaria); }
-
-.btn-ver-carrinho {
-    background: var(--cor-primaria);
-    color: white;
-    border: none;
-    padding: 10px 20px;
+.btn-add-carrinho {
+    background-color: #ffffff;
+    color: var(--cor-primaria);
+    border: 1px solid #e3e3e3;
+    padding: 6px 14px;
     border-radius: 8px;
     font-weight: bold;
-    cursor: pointer;
-}
-
-.hidden { display: none !important; }
-
-/* Botão flutuante de adicionar (+) na foto */
-.btn-add-carrinho {
-    position: absolute;
-    bottom: -5px;
-    right: -5px;
-    background: white;
-    color: var(--cor-primaria);
-    border: 1px solid #e2e2e2;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     cursor: pointer;
     font-size: 0.9rem;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .btn-add-carrinho:active {
@@ -200,8 +170,39 @@ header {
     background-color: #f0f0f0;
 }
 
+/* Barra Flutuante do Carrinho */
+#cart-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background-color: var(--cor-primaria);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.05rem;
+    font-weight: 600;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+    z-index: 1000;
+}
+
+.cart-badge {
+    background-color: white;
+    color: var(--cor-primaria);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* Utilitários */
+.hidden {
+    display: none !important;
+}
+
 /* ==========================================================================
-   ATUALIZAÇÃO: NOVOS MODAIS ISOLADOS (CARRINHO E CADASTRO)
+   NOVOS MODAIS ISOLADOS (CARRINHO E CADASTRO)
    ========================================================================== */
 .modal-bg {
     position: fixed;
@@ -218,15 +219,63 @@ header {
 }
 
 .modal-content h2 { font-size: 1.25rem; color: var(--cor-primaria); margin-bottom: 8px; }
-.modal-content p { font-size: 0.85rem; color: #666; margin-bottom: 20px; }
+.modal-content p { font-size: 0.85rem; color: #666; }
 
-.form-group { margin-bottom: 15px; text-align: left; }
-.form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--cor-texto); }
-.form-group input { width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.95rem; color: var(--cor-texto); }
+/* Formulários Internos do Modal de Cadastro */
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #444; }
+.form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; }
+.form-group input:focus { border-color: var(--cor-primaria); outline: none; }
 
-.btn-salvar-cadastro {
-    width: 100%; background: var(--cor-primaria); color: white;
-    border: none; padding: 13px; border-radius: 8px;
-    font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem;
+.btn-finalizar { background: var(--cor-primaria); color: white; border: none; border-radius: 8px; font-weight: bold; width: 100%; padding: 12px; margin-top: 10px; cursor: pointer; }
+.btn-salvar-cadastro { background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; width: 100%; padding: 12px; margin-top: 15px; cursor: pointer; }
+
+/* ==========================================================================
+   ATUALIZAÇÃO: CONTADOR INLINE REATIVO (ESTILO IFOOD)
+   ========================================================================== */
+.carrinho-contador-inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+    border: 1px solid #e3e3e3;
+    border-radius: 8px;
+    padding: 3px 5px;
+    min-width: 105px;
+    height: 32px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
+.btn-contador {
+    background: none;
+    border: none;
+    color: var(--cor-primaria);
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-contador:active {
+    transform: scale(0.9);
+}
+
+.qtd-contador {
+    font-weight: bold;
+    font-size: 0.95rem;
+    color: var(--cor-texto);
+    min-width: 16px;
+    text-align: center;
+}
+
+/* Nova miniatura para o modal da sacola */
+.modal-lanche-thumb {
+    width: 45px;
+    height: 45px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
