@@ -260,7 +260,7 @@ if (btnAvancarPedido) {
 }
 
 // ==========================================================================
-// SUBMIT DO FORMULÁRIO: VINCULA DADOS AO UID GOOGLE E ENVIA WHATSAPP
+// SUBMIT DO FORMULÁRIO: VINCULA DADOS AO UID GOOGLE E ENVIA WHATSAPP + FIRESTORE
 // ==========================================================================
 if (formCadastro) {
     formCadastro.addEventListener("submit", async (e) => {
@@ -282,15 +282,48 @@ if (formCadastro) {
             rua: document.getElementById("user-rua").value,
             numero: document.getElementById("user-numero").value,
             complemento: document.getElementById("user-complemento").value,
-            email: usuarioLogado.email, // Puxado direto da conta Google
+            email: usuarioLogado.email, 
             atualizadoEm: new Date().toISOString()
         };
 
         try {
-            // Salva ou atualiza os dados na coleção "clientes" com o ID fixo do Google
+            // Importação necessária para gerar IDs automáticos no Firestore para os pedidos
+            // (Adicione "collection" e "addDoc" nos imports do seu arquivo se preferir, ou use direto do escopo se já importou)
+            const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js");
+
+            // 1. Salva ou atualiza os dados cadastrais na coleção "clientes"
             await setDoc(doc(db, "clientes", usuarioLogado.uid), dadosCliente);
 
-            // Geração da mensagem de texto formatada para o WhatsApp
+            // 2. Calcula valores para salvar a estrutura correta exigida pelo painel admin.js
+            const vlrTotal = carrinho.reduce((acc, item) => acc + (parseFloat(item.preco) * item.quantidade), 0);
+
+            // 3. Monta o objeto exatamente como admin.js espera ler
+            const novoPedidoFirestore = {
+                data: new Date().toISOString(), // Necessário para o orderBy("data", "desc")
+                status: "Aguardando",
+                total: vlrTotal,
+                formaPagamento: "Definir no WhatsApp", // O seu modal atual não possui este campo no HTML
+                troco: "Não informado",                // O seu modal atual não possui este campo no HTML
+                cliente: {
+                    nome: dadosCliente.nome,
+                    telefone: dadosCliente.telefone,
+                    endereco: {
+                        rua: dadosCliente.rua,
+                        numero: dadosCliente.numero,
+                        bairro: dadosCliente.bairro,
+                        complemento: dadosCliente.complemento
+                    }
+                },
+                itens: carrinho.map(item => ({
+                    quantidade: item.quantidade,
+                    nome: item.nome
+                }))
+            };
+
+            // 4. Salva o pedido na coleção "pedidos" para o admin.js receber o alerta instantâneo
+            await addDoc(collection(db, "pedidos"), novoPedidoFirestore);
+
+            // 5. Geração da mensagem de texto formatada para o WhatsApp (Mantido idêntico)
             let textoPedido = `*🍔 NOVO PEDIDO (LANCHERIA COQUEIRO)*\n\n`;
             textoPedido += `*--- DADOS DE ENTREGA ---*\n`;
             textoPedido += `👤 *Nome:* ${dadosCliente.nome}\n`;
@@ -307,10 +340,8 @@ if (formCadastro) {
                 textoPedido += `▪️ ${item.quantidade}x ${item.nome} (R$ ${parseFloat(item.preco).toFixed(2).replace('.', ',')} cada)\n`;
             });
 
-            const vlrTotal = carrinho.reduce((acc, item) => acc + (parseFloat(item.preco) * item.quantidade), 0);
             textoPedido += `\n💰 *Total Geral:* R$ ${vlrTotal.toFixed(2).replace('.', ',')}`;
 
-            // Substitua pelo número oficial de atendimento da lancheria
             const numeroLancheria = "5551984779161"; 
             const linkWhatsapp = `https://api.whatsapp.com/send?phone=${numeroLancheria}&text=${encodeURIComponent(textoPedido)}`;
             
