@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importação em Massa - Coqueiro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header style="border-radius: 0 0 10px 10px;">
+        <div class="header-container">
+            <img src="logo.png" alt="Logo Coqueiro" class="logo" onerror="this.src='logo.jpg'">
+            <div>
+                <h1>Carga de Cardápio</h1>
+                <p>Atualize o Firestore instantaneamente usando JSON ou Dados do PDF</p>
+            </div>
+        </div>
+        <a href="admin.html" style="color: white; text-decoration: none; font-weight: bold;"><i class="fas fa-arrow-left"></i> Voltar ao Admin</a>
+    </header>
+
+    <main style="padding: 20px; max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+        
+        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h2 style="color: var(--cor-primaria); margin-bottom: 10px;"><i class="fas fa-magic"></i> Opção 1: Atualizar para o Cardápio de Março 2026</h2>
+            <p style="margin-bottom: 15px; font-size: 0.95rem; color: #555;">Clique no botão abaixo para carregar todos os itens lidos do PDF físico automaticamente (Novidades, Xis Tradicionais, Cobertos e Baurus com preços corrigidos).</p>
+            <button id="btn-carga-automatica" style="background: #e4b223; color: #3e3e2f; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem;">
+                <i class="fas fa-cloud-upload-alt"></i> Injetar Cardápio Físico de Março 2026 Completo
+            </button>
+        </div>
+
+        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h2 style="color: var(--cor-primaria); margin-bottom: 15px;"><i class="fas fa-code"></i> Opção 2: Colar JSON customizado</h2>
+            
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="display:block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;">Cole o Array JSON de lanches aqui:</label>
+                <textarea id="json-input" rows="12" placeholder='[\n  {\n    "nome": "Xis Exemplo",\n    "preco": 45.00,\n    "categoria": "Xis",\n    "descricao": "Ingredientes aqui...",\n    "imagemUrl": "https://..."\n  }\n]' style="width:100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; resize: vertical; font-family: monospace; font-size: 0.85rem;"></textarea>
+            </div>
+
+            <button id="btn-importar-json" style="background: var(--cor-primaria); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem;">
+                <i class="fas fa-database"></i> Processar e Salvar Itens Colados
+            </button>
+        </div>
+
+        <div id="status-log" style="display: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; text-align: center;"></div>
+
+    </main>
+
+    <script type="module" src="importar.js"></script>
+</body>
+</html>
