@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin - Coqueiro</title>
+    <title>Painel Admin - Pedidos</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -13,11 +13,14 @@
         <div class="header-container">
             <img src="logo.png" alt="Logo Coqueiro" class="logo" onerror="this.src='logo.jpg'">
             <div>
-                <h1>Painel de Controle</h1>
-                <p>Gerenciamento de Cardápio &amp; Pedidos em Tempo Real</p>
+                <h1>Painel de Pedidos</h1>
+                <p>Monitor de Vendas &amp; Entregas em Tempo Real</p>
             </div>
         </div>
-        <a href="index.html" style="color: white; text-decoration: none; font-weight: bold;"><i class="fas fa-eye"></i> Ver Site</a>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <a href="importar.html" style="color: #e4b223; text-decoration: none; font-weight: bold;"><i class="fas fa-utensils"></i> Gerenciar Cardápio</a>
+            <a href="index.html" style="color: white; text-decoration: none; font-weight: bold;"><i class="fas fa-eye"></i> Ver Site</a>
+        </div>
     </header>
 
     <main style="padding: 20px; max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
@@ -49,85 +52,7 @@
                 </div>
             </div>
         </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; flex-wrap: wrap; gap: 10px;">
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; flex: 1;">
-                <input type="text" id="busca-nome" placeholder="Buscar lanche por nome..." style="padding: 10px; border: 1px solid #ccc; border-radius: 8px; min-width: 250px;">
-                <select id="filtro-categoria" style="padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
-                    <option value="todos">Todas Categorias</option>
-                    <option value="xis">Xis</option>
-                    <option value="hamburguer">Hambúrgueres</option>
-                    <option value="torrada">Torradas</option>
-                    <option value="porcao">Porções</option>
-                    <option value="bebida">Bebidas</option>
-                </select>
-            </div>
-            <button id="btn-abrir-cadastro" class="btn-primary" style="background: var(--cor-primaria); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;"><i class="fas fa-plus"></i> Novo Lanche</button>
-        </div>
-
-<div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                <thead>
-                    <tr style="border-bottom: 2px solid #eee; background: #f9f9f9;">
-                        <th style="padding: 12px 10px;">Foto</th>
-                        <th style="padding: 12px 10px;">Nome</th>
-                        <th style="padding: 12px 10px;">Categoria</th>
-                        <th style="padding: 12px 10px;">Preço</th>
-                        <th style="padding: 12px 10px; text-align: center;">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="tabela-lanches">
-                    </tbody>
-            </table>
-        </div>
     </main>
-
-    <div id="modal-lanche" class="modal-bg hidden">
-        <div class="modal-content" style="max-width: 500px; width: 90%;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 id="form-titulo" style="margin: 0;">Novo Lanche</h2>
-                <button id="btn-fechar-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;"><i class="fas fa-times"></i></button>
-            </div>
-            
-            <form id="form-cadastro">
-                <input type="hidden" id="lanche-id">
-                
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">Nome do Lanche:</label>
-                    <input type="text" id="nomeLanche" placeholder="Ex: Xis Salada Especial" required style="width:100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
-                </div>
-
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">Categoria:</label>
-                    <select id="categoria" required style="width:100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; background: white;">
-                        <option value="" disabled selected>Selecione...</option>
-                        <option value="xis">Xis</option>
-                        <option value="hamburguer">Hambúrgueres</option>
-                        <option value="torrada">Torradas</option>
-                        <option value="porcao">Porções</option>
-                        <option value="bebida">Bebidas</option>
-                    </select>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">Preço (R$):</label>
-                    <input type="number" id="preco" step="0.01" required style="width:100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
-                </div>
-
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">URL da Imagem:</label>
-                    <input type="url" id="imagemUrl" placeholder="https://linkdafoto.com/foto.jpg" required style="width:100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
-                </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem;">Descrição / Ingredientes:</label>
-                    <textarea id=\"descricao\" rows=\"3\" required style=\"width:100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; resize: none; font-family: inherit;\"></textarea>
-                </div>
-
-                <button type="submit" id="btn-submit" style="width: 100%; background: var(--cor-primaria); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer;">Salvar Produto</button>
-            </form>
-        </div>
-    </div>
 
     <script type="module" src="admin.js"></script>
 </body>

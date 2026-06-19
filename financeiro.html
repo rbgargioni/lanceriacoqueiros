@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Financeiro - Coqueiro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header style="border-radius: 0 0 10px 10px;">
+        <div class="header-container">
+            <img src="logo.png" alt="Logo Coqueiro" class="logo" onerror="this.src='logo.jpg'">
+            <div>
+                <h1>Painel Financeiro e Desempenho</h1>
+                <p>Análise de Ganhos, Faturamento Mensal e Fluxo de Produtos</p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <a href="admin.html" style="color: white; text-decoration: none; font-weight: bold;"><i class="fas fa-arrow-left"></i> Monitor de Pedidos</a>
+            <a href="importar.html" style="color: #e4b223; text-decoration: none; font-weight: bold;"><i class="fas fa-utensils"></i> Gerenciar Cardápio</a>
+        </div>
+    </header>
+
+    <main style="padding: 20px; max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid #138342;">
+                <small style="color: #777; font-weight: bold; text-transform: uppercase;">Faturamento Total Histórico</small>
+                <h2 id="faturamento-total" style="color: #138342; margin-top: 5px;">R$ 0,00</h2>
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid #e4b223;">
+                <small style="color: #777; font-weight: bold; text-transform: uppercase;">Total de Pedidos</small>
+                <h2 id="qtd-total-pedidos" style="color: #3e3e2f; margin-top: 5px;">0</h2>
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid #007bff;">
+                <small style="color: #777; font-weight: bold; text-transform: uppercase;">Média por Pedido (Ticket Médio)</small>
+                <h2 id="ticket-medio" style="color: #007bff; margin-top: 5px;">R$ 0,00</h2>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            
+            <div style="flex: 1.5; min-width: 320px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                <h2 style="color: var(--cor-primaria); margin-bottom: 15px;"><i class="fas fa-calendar-alt"></i> Ganhos Consolidados por Mês</h2>
+                
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #eee; background: #f9f9f9;">
+                                <th style="padding: 12px 10px;">Mês / Ano</th>
+                                <th style="padding: 12px 10px;">Qtd. Pedidos</th>
+                                <th style="padding: 12px 10px; text-align: right;">Total Faturado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-financeiro-mensal">
+                            <tr>
+                                <td colspan="3" style="padding: 20px; text-align: center; color: #777; font-style: italic;">Carregando dados financeiros...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 20px;">
+                
+                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid #138342;">
+                    <h3 style="color: #138342; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-chart-line"></i> Mais Vendidos (Top Campeões)
+                    </h3>
+                    <div id="lista-mais-vendidos" style="display: flex; flex-direction: column; gap: 10px;">
+                        </div>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid #dc3545;">
+                    <h3 style="color: #dc3545; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-arrow-down"></i> Menos Vendidos / Pouca Saída
+                    </h3>
+                    <div id="lista-menos-vendidos" style="display: flex; flex-direction: column; gap: 10px;">
+                        </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script type="module" src="financeiro.js"></script>
+</body>
+</html>
