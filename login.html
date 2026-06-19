@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Administrativo - Coqueiro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding-bottom: 0;">
+
+    <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 380px; text-align: center;">
+        <img src="logo.png" alt="Logo Coqueiro" style="width: 80px; margin-bottom: 15px;" onerror="this.src='logo.jpg'">
+        <h2 style="color: var(--cor-primaria); margin-bottom: 5px;">Acesso ao Sistema</h2>
+        <p style="color: #777; font-size: 0.9rem; margin-bottom: 20px;">Digite suas credenciais operacionais</p>
+
+        <form id="form-login-interno" style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+            <div class="form-group">
+                <label style="font-weight: 600; font-size: 0.9rem;">Usuário:</label>
+                <input type="text" id="loginUsuario" placeholder="Ex: admin ou caixa" required style="width:100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+            </div>
+            
+            <div class="form-group">
+                <label style="font-weight: 600; font-size: 0.9rem;">Senha:</label>
+                <input type="password" id="senhaUsuario" placeholder="••••••••" required style="width:100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+            </div>
+
+            <button type="submit" style="background: var(--cor-primaria); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 5px;">
+                Entrar no Painel
+            </button>
+        </form>
+        
+        <div id="erro-login" style="display: none; margin-top: 15px; color: #dc3545; font-weight: bold; font-size: 0.9rem;"></div>
+    </div>
+
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+
+        document.getElementById("form-login-interno").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const usuario = document.getElementById("loginUsuario").value.trim().toLowerCase();
+            const senha = document.getElementById("senhaUsuario").value;
+            const erroDiv = document.getElementById("erro-login");
+
+            try {
+                // Busca o documento do usuário digitado no Firestore
+                const docRef = doc(db, "usuarios_permitidos", usuario);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists() && docSnap.data().senha === senha) {
+                    // Armazena uma sessão local simples no navegador válida para a abas abertas
+                    sessionStorage.setItem("usuarioLogado", usuario);
+                    window.location.href = "admin.html";
+                } else {
+                    erroDiv.style.display = "block";
+                    erroDiv.innerText = "❌ Usuário ou senha incorretos.";
+                }
+            } catch (error) {
+                console.error(error);
+                erroDiv.style.display = "block";
+                erroDiv.innerText = "Erro ao conectar com o banco de dados.";
+            }
+        });
+    </script>
+</body>
+</html>

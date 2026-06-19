@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Usuários do Sistema</title>
+    <!-- <script type="module" src="protecao.js"></script> -->
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header style="border-radius: 0 0 10px 10px;">
+        <div class="header-container">
+            <img src="logo.png" alt="Logo Coqueiro" class="logo" onerror="this.src='logo.jpg'">
+            <div>
+                <h1>Controle de Acesso</h1>
+                <p>Gerencie quem pode acessar os painéis administrativos e financeiros</p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <a href="admin.html" style="color: white; text-decoration: none; font-weight: bold;"><i class="fas fa-arrow-left"></i> Painel de Pedidos</a>
+            <a href="financeiro.html" style="color: white; text-decoration: none; font-weight: bold;"><i class="fas fa-wallet"></i> Financeiro</a>
+        </div>
+    </header>
+
+    <main style="padding: 20px; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+        
+        <div id="status-log" style="display: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; text-align: center;"></div>
+
+        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h2 style="color: var(--cor-primaria); margin-bottom: 15px;"><i class="fas fa-user-plus"></i> Autorizar Novo Usuário (E-mail Google)</h2>
+            
+            <form id="form-usuario" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div style="flex: 2; min-width: 250px;">
+                    <input type="email" id="emailUsuario" placeholder="Ex: funcionario@gmail.com" required style="width:100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem;">
+                </div>
+                <button type="submit" style="flex: 1; min-width: 150px; background: #138342; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer;">
+                    <i class="fas fa-check"></i> Dar Acesso
+                </button>
+            </form>
+            <p style="font-size: 0.8rem; color: #777; margin-top: 10px;"><i class="fas fa-info-circle"></i> O usuário precisará fazer login usando esta conta Google exata na página inicial.</p>
+        </div>
+
+        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h2 style="color: var(--cor-primaria); margin-bottom: 15px;"><i class="fas fa-users-cog"></i> Usuários com Acesso Liberado</h2>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #eee; background: #f9f9f9;">
+                            <th style="padding: 12px 10px;">E-mail Autorizado</th>
+                            <th style="padding: 12px 10px; text-align: center; width: 100px;">Revogar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-usuarios">
+                        <tr>
+                            <td colspan="2" style="padding: 20px; text-align: center; color: #777; font-style: italic;">Carregando lista de permissões...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script type="module" src="usuarios.js"></script>
+</body>
+</html>
