@@ -18,119 +18,164 @@
             </div>
         </div>
         <div id="auth-section">
-            <button id="btn-login" class="btn-secondary" style="background: white; color: var(--cor-primaria); border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer;"><i class="fab fa-google"></i> Entrar</button>
+            <button id="btn-login" class=\"btn-secondary\" style="background: white; color: var(--cor-primaria); border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer;"><i class="fab fa-google"></i> Entrar</button>
             <span id="user-info" class="hidden" style="font-weight: bold; font-size: 0.9rem; color: white;"></span>
         </div>
     </header>
 
-    <div class="categorias-scroll">
-        <button class="cat-item active" onclick="filtrarCategoria('todos')">🔥 Todos</button>
-        <button class="cat-item" onclick="filtrarCategoria('xis')">🍔 Xis</button>
-        <button class="cat-item" onclick="filtrarCategoria('hamburguer')">🍟 Hambúrgueres</button>
-        <button class="cat-item" onclick="filtrarCategoria('bebidas')">🥤 Bebidas</button>
-        <button class="cat-item" onclick="filtrarCategoria('sobre')">ℹ️ Sobre Nós</button>
-    </div>
+    <nav class="categories">
+        <button class="cat-item active" onclick="filtrarCategoria('sobre')">🏠 Sobre</button>
+        <button class="cat-item" onclick="filtrarCategoria('todos')">📋 Todos</button>
+        <button class="cat-item" onclick="filtrarCategoria('Novidades')">✨ Novidades</button>
+        <button class="cat-item" onclick="filtrarCategoria('Xis')">🍔 Xis</button>
+        <button class="cat-item" onclick="filtrarCategoria('Hambúrgueres')">🥩 Hambúrgueres</button>
+        <button class="cat-item" onclick="filtrarCategoria('Torradas')">🥪 Torradas</button>
+        <button class="cat-item" onclick="filtrarCategoria('Porções')">🍟 Porções</button>
+        <button class="cat-item" onclick="filtrarCategoria('Bebidas')">🥤 Bebidas</button>
+    </nav>
 
-    <main style="padding: 15px; max-width: 600px; margin: 0 auto;">
-        <div id="secao-sobre" style="display: none; background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-            <h2 style="color: var(--cor-primaria); margin-bottom: 10px;">Lancheria Coqueiro</h2>
-            <p style="font-size: 0.95rem; line-height: 1.5; color: #555;">Servindo os melhores xis e hambúrgueres tradicionais de Porto Alegre desde 1977. Qualidade, sabor e tradição que passam de geração em geração.</p>
+    <main class="container">
+        
+        <div id="secao-sobre" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 10px;">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <h2 style="color: var(--cor-primaria); margin-bottom: 8px;"><i class="fas fa-history"></i> Nossa História</h2>
+                <p style="color: #666; font-size: 0.95rem;">Tradição, sabor e o verdadeiro xis gigante de Porto Alegre desde 1977.</p>
+            </div>
+
+            <div style="line-height: 1.6; color: #444; margin-bottom: 30px; font-size: 0.95rem;">
+                <p style="margin-bottom: 12px;">Fundada em 1977, a <strong>Lancheria Coqueiro</strong> orgulha-se de fazer parte da cultura e do paladar dos porto-alegrenses. Mantendo receitas tradicionais e ingredientes selecionados, fomos pioneiros em transformar o lanche mais amado do Rio Grande do Sul numa experiência única para partilhar com toda a família.</p>
+                <p>O nosso compromisso é servir qualidade, fartura e aquele sabor nostálgico que atravessa gerações.</p>
+            </div>
+
+            <div style="border-top: 2px dashed #eee; padding-top: 25px;">
+                <h3 style="color: var(--cor-primaria); margin-bottom: 15px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-newspaper"></i> Coqueiro na Mídia
+                </h3>
+                
+                <div style="display: flex; gap: 20px; background: #f9f9f9; border: 1px solid #eee; border-radius: 10px; padding: 15px; flex-wrap: wrap; align-items: center;">
+                    
+                    <div style="flex: 1; min-width: 200px; max-width: 260px;">
+                        <img src="https://www.rbsdirect.com.br/imagesrc/25267365.jpg?w=1400" alt="Xis Gigante Coqueiro GZH" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); object-fit: cover; aspect-ratio: 16/10;">
+                    </div>
+                    
+                    <div style="flex: 2; min-width: 250px; display: flex; flex-direction: column; gap: 8px;">
+                        <span style="font-size: 0.75rem; background: #e4b223; color: #fff; font-weight: bold; padding: 3px 8px; border-radius: 4px; align-self: flex-start;">REPORTAGEM GZH</span>
+                        <h4 style="font-size: 1.1rem; color: #222; line-height: 1.3; font-weight: 700; margin: 0;">
+                            Coqueiro, Calota e Gelson: como surgiram os xis giants em Porto Alegre
+                        </h4>
+                        <p style="font-size: 0.88rem; color: #666; margin: 0; line-height: 1.4;">
+                            O título de cidade referência do xis gaúcho: Porto Alegre tem recebido uma série de lancherias com uma proposta específica da iguaria: o xis gigante — também chamado de tamanho família, calota ou roda de carreta. Conheça a história do lanche criado na década de 1970.
+                        </p>
+                        <a href="https://gauchazh.clicrbs.com.br/porto-alegre/noticia/2019/06/coqueiro-calota-e-gelson-como-surgiram-os-xis-gigantes-em-porto-alegre-cjx3oprr0014h01o9piauhtwg.html" target="_blank" style="display: inline-flex; align-items: center; gap: 5px; color: var(--cor-primaria); text-decoration: none; font-weight: bold; font-size: 0.85rem; margin-top: 5px; width: max-content;">
+                            Ler matéria completa na GaúchaZH <i class="fas fa-external-link-alt" style="font-size: 0.75rem;"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="menu-lanches" class="lista-lanches">
-            </div>
+        <div id="menu-lanches" class="products-grid hidden"></div>
     </main>
 
-    <div id="cart-bar" class="hidden" onclick="abrirModalCarrinho()">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <span id="cart-qtd" class="cart-badge">0</span>
-            <span>Ver sacola</span>
+    <div id="cart-bar" class="cart-bar hidden" onclick="abrirModalCarrinho()">
+        <div class="cart-bar-content">
+            <div class="cart-info-left">
+                <i class="fas fa-shopping-basket"></i>
+                <span id="cart-qtd" class="cart-badge">0</span>
+                <span>Ver sacola</span>
+            </div>
+            <span id="cart-total" class="cart-price">R$ 0,00</span>
         </div>
-        <span id="cart-total" style="font-weight: bold;">R$ 0,00</span>
     </div>
 
-    <div id="modal-carrinho" class="modal-bg hidden">
+    <div id="modal-carrinho" class="modal-overlay hidden">
         <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div class="modal-header">
                 <h2>Sua Sacola</h2>
-                <button onclick="fecharModalCarrinho()" style="background:none; border:none; font-size: 1.2rem; cursor:pointer; color:#999;"><i class="fas fa-times"></i></button>
+                <button class="btn-close" onclick="fecharModalCarrinho()">&times;</button>
             </div>
-            <div id="carrinho-itens" style="max-height: 240px; overflow-y: auto; margin-bottom: 15px;">
+            <div id="carrinho-itens" class="modal-body-scroll">
                 </div>
-            <div style="border-top: 1px solid #eee; padding-top: 15px; margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem;">
-                    <span>Total:</span>
-                    <span id="modal-cart-total">R$ 0,00</span>
+            <div class="modal-footer">
+                <div class="modal-total-box">
+                    <span>Total do pedido:</span>
+                    <span id="modal-cart-total" class="total-destaque">R$ 0,00</span>
                 </div>
+                <button id="btn-avancar-pedido" class="btn-finalizar" onclick="avancarParaCadastro()">Avançar para Entrega</button>
             </div>
-            <button id="btn-avancar-pedido" class="btn-finalizar" style="width: 100%; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer;">Confirmar e Continuar</button>
         </div>
     </div>
 
-    <div id="modal-cadastro" class="modal-bg hidden">
-        <div class="modal-content" style="max-width: 460px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <div id="modal-cadastro" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
                 <h2>Dados de Entrega</h2>
-                <button type="button" onclick="fecharModalCadastro()" style="background:none; border:none; font-size: 1.2rem; cursor:pointer; color:#999;"><i class="fas fa-times"></i></button>
+                <button class="btn-close" onclick="fecharModalCadastro()">&times;</button>
             </div>
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Vincule seu endereço e contato à sua conta para receber a entrega do seu pedido.</p>
-            
-            <form id="form-cadastro">
+            <form id="form-cadastro" style="padding: 15px; display: flex; flex-direction: column; gap: 12px;">
                 <div class="form-group">
-                    <label>Nome Completo:</label>
-                    <input type="text" id="user-nome" required placeholder="Digite seu nome completo">
-                </div>
-                <div class="form-group">
-                    <label>CPF:</label>
-                    <input type="text" id="user-cpf" placeholder="000.000.000-00" required>
+                    <label>Seu Nome Completo:</label>
+                    <input type="text" id="user-nome" placeholder="Como quer ser chamado" required>
                 </div>
                 <div class="form-group">
                     <label>Telefone / WhatsApp:</label>
                     <input type="tel" id="user-telefone" placeholder="(51) 99999-9999" required>
                 </div>
-                <div class="form-group">
-                    <label>Cidade:</label>
-                    <input type="text" id="user-cidade" value="Porto Alegre" required>
-                </div>
-                <div class="form-group">
-                    <label>Bairro:</label>
-                    <input type="text" id="user-bairro" placeholder="Digite seu bairro" required>
-                </div>
-                <div class="form-group">
-                    <label>Rua / Avenida:</label>
-                    <input type="text" id="user-rua" placeholder="Ex: Av. Bento Gonçalves" required>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 3;" class="form-group">
+                        <label>Rua / Logradouro:</label>
+                        <input type="text" id="user-rua" placeholder="Nome da rua" required>
+                    </div>
+                    <div style="flex: 1;" class="form-group">
+                        <label>Nº:</label>
+                        <input type="text" id="user-numero" placeholder="Ex: 123" required>
+                    </div>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <div style="flex: 1;" class="form-group">
-                        <label>Número:</label>
-                        <input type="text" id="user-numero" placeholder="Nº" required>
+                    <div style="flex: 2;" class="form-group">
+                        <label>Bairro:</label>
+                        <input type="text" id="user-bairro" placeholder="Bairro de Porto Alegre" required>
                     </div>
                     <div style="flex: 2;" class="form-group">
                         <label>Complemento:</label>
-                        <input type="text" id="user-complemento" placeholder="Apto, Bloco, Casa (Opcional)">
+                        <input type="text" id="user-complemento" placeholder="Apto, Bloco (Opcional)">
                     </div>
                 </div>
-                <select id="user-pagamento" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; background: white;" onchange="controlarCampoTroco()">
-                    <option value="" disabled selected>Selecione como quer pagar</option>
-                    <option value="Pix">📱 Pix</option>
-                    <option value="Cartão de Crédito">💳 Cartão de Crédito</option>
-                    <option value="Cartão de Débito">💳 Cartão de Débito</option>
-                    <option value="Dinheiro">💵 Dinheiro</option>
-                </select>
+                
+                <div class="form-group">
+                    <label>Forma de Pagamento:</label>
+                    <select id="user-pagamento" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; background: white;" onchange="controlarCampoTroco()">
+                        <option value="" disabled selected>Selecione como quer pagar</option>
+                        <option value="Pix">📱 Pix</option>
+                        <option value="Cartão de Crédito">💳 Cartão de Crédito</option>
+                        <option value="Cartão de Débito">💳 Cartão de Débito</option>
+                        <option value="Dinheiro">💵 Dinheiro</option>
+                    </select>
+                </div>
+
+                <div id="grupo-troco" class="form-group hidden" style="margin-top: 4px;">
+                    <label>Precisa de troco para quanto?</label>
+                    <input type="text" id="user-troco" placeholder="Ex: Para R$ 50,00">
+                </div>
+
                 <button type="submit" class="btn-salvar-cadastro">Salvar Cadastro e Enviar Pedido</button>
             </form>
-            <div class="form-group" style="margin-top: 12px;">
-    <label>Forma de Pagamento:</label>
-
-</div>
-
-<div id="grupo-troco" class="form-group hidden" style="margin-top: 12px;">
-    <label>Precisa de troco para quanto?</label>
-    <input type="text" id="user-troco" placeholder="Ex: Troco para R$ 50,00 ou Não preciso">
-</div>
         </div>
     </div>
 
     <script type="module" src="app.js"></script>
+    
+    <script>
+        // Função auxiliar para controlar exibição do campo de troco
+        function controlarCampoTroco() {
+            const pagamento = document.getElementById('user-pagamento').value;
+            const grupoTroco = document.getElementById('grupo-troco');
+            if (pagamento === 'Dinheiro') {
+                grupoTroco.classList.remove('hidden');
+            } else {
+                grupoTroco.classList.add('hidden');
+            }
+        }
+    </script>
 </body>
 </html>
