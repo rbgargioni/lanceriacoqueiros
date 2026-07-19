@@ -122,12 +122,17 @@ if (listaPendentesContainer && listaAceitosContainer) {
             }
         });
 
+        // Correção aplicada aqui: Nome da variável corrigido e proteção extra de áudio
         if (somBuzina && audioPermitido) {
-            if (temPedidoNovoAwaiting) {
-                somBuzina.play().catch(e => console.log("Áudio aguardando liberação.", e));
+            if (temPedidoNovoAguardando) {
+                somBuzina.play().catch(e => console.log("Áudio bloqueado pelo navegador ou arquivo indisponível.", e));
             } else {
-                somBuzina.pause();
-                somBuzina.currentTime = 0;
+                try {
+                    somBuzina.pause();
+                    somBuzina.currentTime = 0;
+                } catch(e) {
+                    console.log("Erro ao pausar o áudio:", e);
+                }
             }
         }
 
