@@ -58,6 +58,29 @@ onAuthStateChanged(auth, async (user) => {
         }
     }
 });
+function animarCards() {
+
+    const cards = document.querySelectorAll(".lanche-item");
+
+    const observer = new IntersectionObserver((entries) => {
+
+        entries.forEach(entry => {
+
+            if(entry.isIntersecting){
+
+                entry.target.classList.add("show");
+
+            }
+
+        });
+
+    }, {
+        threshold:0.15
+    });
+
+    cards.forEach(card => observer.observe(card));
+
+}
 
 // Função que puxa os dados adicionais de endereço usando o UID do Google
 async function carregarDadosUsuarioExistente(user) {
@@ -156,6 +179,7 @@ function renderizarCardapio(lanches) {
         `;
         menuContainer.appendChild(itemDiv);
     });
+    animarCards();
 }
 
 window.adicionarAoCarrinho = function(id) {
