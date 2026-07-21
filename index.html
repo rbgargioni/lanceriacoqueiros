@@ -172,6 +172,9 @@
                         <label>Complemento:</label>
                         <input type="text" id="user-complemento" placeholder="Apto, Bloco, Casa (Opcional)">
                     </div>
+                </div>           
+                <div class="form-group" style="margin-top: 12px;">
+                    <label>Forma de Pagamento:</label>
                 </div>
                 <select id="user-pagamento" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; background: white;" onchange="controlarCampoTroco()">
                     <option value="" disabled selected>Selecione como quer pagar</option>
@@ -182,9 +185,7 @@
                 </select>
                 <button type="submit" class="btn-salvar-cadastro">Salvar Cadastro e Enviar Pedido</button>
             </form>
-            <div class="form-group" style="margin-top: 12px;">
-                <label>Forma de Pagamento:</label>
-            </div>
+
 
             <div id="grupo-troco" class="form-group hidden" style="margin-top: 12px;">
                 <label>Precisa de troco para quanto?</label>
