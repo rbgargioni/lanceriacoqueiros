@@ -195,7 +195,8 @@ window.adicionarAoCarrinho = function(id) {
         carrinho.push({ ...lanche, quantidade: 1 });
     }
     atualizarBarraCarrinho();
-    renderizarCardapio(listaLanches);
+    atualizarCard(id);
+    
 };
 
 function atualizarBarraCarrinho() {
@@ -262,13 +263,50 @@ window.alterarQuantidade = function(id, delta) {
         carrinho = carrinho.filter(item => item.id !== id);
     }
     atualizarBarraCarrinho();
-    renderizarCardapio(listaLanches);
+    atualizarCard(id);
     
     if (modalCarrinho && !modalCarrinho.classList.contains("hidden")) {
         renderizarItensCarrinhoModal();
     }
 };
+function atualizarCard(id){
 
+    const card = document.querySelector(`[onclick="adicionarAoCarrinho('${id}')"]`)?.closest(".lanche-item")
+        || [...document.querySelectorAll(".lanche-item")].find(c =>
+            c.querySelector(`[onclick*="${id}"]`)
+        );
+
+    if(!card) return;
+
+    const lanche = listaLanches.find(l=>l.id===id);
+    const item = carrinho.find(i=>i.id===id);
+
+    const area = card.querySelector(".lanche-preco-acao");
+
+    area.innerHTML = `
+        <span class="lanche-preco">
+            R$ ${parseFloat(lanche.preco).toFixed(2).replace('.',',')}
+        </span>
+
+        ${
+            item ?
+
+            `<div class="carrinho-contador-inline">
+                <button onclick="alterarQuantidade('${id}',-1)" class="btn-contador">-</button>
+                <span class="qtd-contador">${item.quantidade}</span>
+                <button onclick="alterarQuantidade('${id}',1)" class="btn-contador">+</button>
+            </div>`
+
+            :
+
+            `<button class="btn-add-carrinho"
+                onclick="adicionarAoCarrinho('${id}')">
+                <i class="fas fa-plus"></i> Adicionar
+            </button>`
+        }
+    `;
+
+}
 // Ação do Botão Avançar dentro da Sacola
 if (btnAvancarPedido) {
     btnAvancarPedido.addEventListener("click", () => {
