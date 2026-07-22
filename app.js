@@ -222,30 +222,38 @@ function renderizarItensCarrinhoModal() {
         return;
     }
 
-    carrinho.forEach(item => {
+    carrinho.forEach((item, index) => {
         const itemDiv = document.createElement("div");
-        itemDiv.style.display = "flex";
-        itemDiv.style.justifyContent = "space-between";
-        itemDiv.style.alignItems = "center";
+        itemDiv.style.flexDirection = "column";
         itemDiv.style.marginBottom = "12px";
         itemDiv.style.background = "#f9f9f9";
-        itemDiv.style.padding = "8px 12px";
+        itemDiv.style.padding = "10px 12px";
         itemDiv.style.borderRadius = "8px";
-        itemDiv.style.gap = "10px";
+        itemDiv.style.gap = "8px";
 
         itemDiv.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                <img src="${item.imagemUrl}" alt="${item.nome}" class="modal-lanche-thumb" onerror="this.src='logo.jpg'">
-                <div>
-                    <h4 style="margin:0; font-size:0.95rem;">${item.nome}</h4>
-                    <small style="color:#777;">R$ ${parseFloat(item.preco).toFixed(2).replace('.', ',')} x ${item.quantidade}</small>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                    <img src="${item.imagemUrl}" alt="${item.nome}" class="modal-lanche-thumb" onerror="this.src='logo.jpg'">
+                    <div>
+                        <h4 style="margin:0; font-size:0.95rem;">${item.nome}</h4>
+                        <small style="color:#777;">R$ ${parseFloat(item.preco).toFixed(2).replace('.', ',')} x ${item.quantidade}</small>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button onclick="alterarQuantidade('${item.id}', -1)" style="border:none; background:#ddd; padding:2px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">-</button>
+                    <span style="font-weight:bold; font-size:0.9rem;">${item.quantidade}</span>
+                    <button onclick="alterarQuantidade('${item.id}', 1)" style="border:none; background:#ddd; padding:2px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">+</button>
                 </div>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <button onclick="alterarQuantidade('${item.id}', -1)" style="border:none; background:#ddd; padding:2px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">-</button>
-                <span style="font-weight:bold; font-size:0.9rem;">${item.quantidade}</span>
-                <button onclick="alterarQuantidade('${item.id}', 1)" style="border:none; background:#ddd; padding:2px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">+</button>
-            </div>
+            
+            <!-- Campo de Observação por Item -->
+            <input type="text" 
+                placeholder="Ex: sem alface, sem ervilha..." 
+                value="${item.observacao || ''}" 
+                onchange="atualizarObservacaoItem(${index}, this.value)"
+                style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85rem; background: #fff;"
+            />
         `;
         carrinhoItensContainer.appendChild(itemDiv);
     });
@@ -253,6 +261,13 @@ function renderizarItensCarrinhoModal() {
     const vlrTotal = carrinho.reduce((acc, item) => acc + (parseFloat(item.preco) * item.quantidade), 0);
     if (modalCartTotal) modalCartTotal.innerText = `R$ ${vlrTotal.toFixed(2).replace('.', ',')}`;
 }
+
+// Função para atualizar o estado do item no carrinho ao digitar
+window.atualizarObservacaoItem = function(index, texto) {
+    if (carrinho[index]) {
+        carrinho[index].observacao = texto;
+    }
+};
 
 window.alterarQuantidade = function(id, delta) {
     const item = carrinho.find(item => item.id === id);
@@ -362,27 +377,28 @@ if (formCadastro) {
             const vlrTotal = carrinho.reduce((acc, item) => acc + (parseFloat(item.preco) * item.quantidade), 0);
 
             // 3. Monta o objeto exatamente como admin.js espera ler
-            const novoPedidoFirestore = {
-                data: new Date().toISOString(), // Necessário para o orderBy("data", "desc")
-                status: "Aguardando",
-                total: vlrTotal,
-                formaPagamento: "Definir no WhatsApp", // O seu modal atual não possui este campo no HTML
-                troco: "Não informado",                // O seu modal atual não possui este campo no HTML
-                cliente: {
-                    nome: dadosCliente.nome,
-                    telefone: dadosCliente.telefone,
-                    endereco: {
-                        rua: dadosCliente.rua,
-                        numero: dadosCliente.numero,
-                        bairro: dadosCliente.bairro,
-                        complemento: dadosCliente.complemento
-                    }
-                },
-                itens: carrinho.map(item => ({
-                    quantidade: item.quantidade,
-                    nome: item.nome
-                }))
-            };
+const novoPedidoFirestore = {
+    data: new Date().toISOString(),
+    status: "Aguardando",
+    total: vlrTotal,
+    formaPagamento: document.getElementById("user-pagamento")?.value || "Não informado",
+    troco: document.getElementById("user-troco")?.value || "Não informado",
+    cliente: {
+        nome: dadosCliente.nome,
+        telefone: dadosCliente.telefone,
+        endereco: {
+            rua: dadosCliente.rua,
+            numero: dadosCliente.numero,
+            bairro: dadosCliente.bairro,
+            complemento: dadosCliente.complemento
+        }
+    },
+    itens: carrinho.map(item => ({
+        quantidade: item.quantidade,
+        nome: item.nome,
+        observacao: item.observacao || "" // <--- Salvando no Firestore
+    }))
+};
 
             // 4. Salva o pedido na coleção "pedidos" para o admin.js receber o alerta instantâneo
             await addDoc(collection(db, "pedidos"), novoPedidoFirestore);
@@ -399,11 +415,14 @@ if (formCadastro) {
                 textoPedido += `🏢 *Complemento:* ${dadosCliente.complemento}\n`;
             }
             textoPedido += `\n*--- ITENS DO PEDIDO ---*\n`;
-
+            
             carrinho.forEach(item => {
                 textoPedido += `▪️ ${item.quantidade}x ${item.nome} (R$ ${parseFloat(item.preco).toFixed(2).replace('.', ',')} cada)\n`;
+                if (item.observacao && item.observacao.trim() !== "") {
+                    textoPedido += `   └ 📝 *Obs:* ${item.observacao.trim()}\n`;
+                }
             });
-
+            
             textoPedido += `\n💰 *Total Geral:* R$ ${vlrTotal.toFixed(2).replace('.', ',')}`;
 
             const numeroLancheria = "5551984779161"; 
