@@ -25,20 +25,36 @@ body {
 header {
     background-color: var(--cor-primaria);
     color: white;
-    padding: 20px 15px;
+    padding: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
+    gap: 10px;
 }
 
 .header-container {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
+    min-width: 0; /* Permite encolher em telas pequenas */
 }
 
+#auth-section {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    max-width: 35%; /* Limita o tamanho para não empurrar o título */
+}
+#user-info {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Coloca '...' caso o nome seja muito grande */
+}
 .logo {
     width: 60px;
     height: 60px;
@@ -48,8 +64,9 @@ header {
 }
 
 .header-info h1 {
-    font-size: 1.4rem;
+    font-size: 1.2rem; /* Reduzido levemente para telas de celular */
     font-weight: 700;
+    white-space: nowrap;
 }
 
 .header-info p {
@@ -207,14 +224,23 @@ header {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.6);
-    display: flex; justify-content: center; align-items: center;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
     z-index: 2000;
+    padding: 15px;
 }
 
 .modal-content {
-    background: white; width: 90%; max-width: 420px;
-    padding: 25px; border-radius: 16px;
+    background: white; 
+    width: 100%; 
+    max-width: 420px;
+    max-height: 90vh; /* Não deixa o modal ultrapassar a altura da tela do iOS */
+    overflow-y: auto; /* Permite rolar se o conteúdo for longo */
+    padding: 20px; 
+    border-radius: 16px;
     box-shadow: 0 4px 25px rgba(0,0,0,0.15);
+    -webkit-overflow-scrolling: touch; /* Melhora a rolagem suave no iOS */
 }
 
 .modal-content h2 { font-size: 1.25rem; color: var(--cor-primaria); margin-bottom: 8px; }
