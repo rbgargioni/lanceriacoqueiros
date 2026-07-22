@@ -293,7 +293,15 @@ header {
     object-fit: cover;
     border: 1px solid #eee;
 }
-
+.input-obs-item {
+    width: 100%;
+    margin-top: 8px; /* Afasta o input do topo (foto/botões) */
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    background: #fff;
+}
 .lanche-item{
     opacity: 0;
     transform: translateY(50px);

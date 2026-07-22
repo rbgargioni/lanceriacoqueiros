@@ -36,7 +36,31 @@ if (btnLogin) {
         }
     });
 }
+document.querySelectorAll(".cat-item").forEach(btn => btn.classList.remove("active"));
 
+// Função para filtrar os lanches via digitação
+window.filtrarPorTexto = function(termo) {
+    const textoBusca = termo.toLowerCase().trim();
+    
+    // Garante que a seção "Sobre" fique oculta enquanto pesquisa
+    const secaoSobre = document.getElementById("secao-sobre");
+    if (secaoSobre) secaoSobre.style.display = "none";
+
+    // Se o campo estiver vazio, restaura a exibição completa
+    if (textoBusca === "") {
+        renderizarCardapio(listaLanches);
+        return;
+    }
+
+    // Filtra no nome OU na descrição do lanche
+    const lanchesFiltrados = listaLanches.filter(lanche => {
+        const nome = (lanche.nome || "").toLowerCase();
+        const descricao = (lanche.descricao || "").toLowerCase();
+        return nome.includes(textoBusca) || descricao.includes(textoBusca);
+    });
+
+    renderizarCardapio(lanchesFiltrados);
+};
 // Observador do estado de autenticação (Dispara automaticamente ao logar/deslogar)
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -249,6 +273,7 @@ function renderizarItensCarrinhoModal() {
             
             <!-- Campo de Observação por Item -->
             <input type="text" 
+                class="input-obs-item"
                 placeholder="Ex: sem alface, sem ervilha..." 
                 value="${item.observacao || ''}" 
                 onchange="atualizarObservacaoItem(${index}, this.value)"
