@@ -269,6 +269,13 @@ window.atualizarObservacaoItem = function(index, texto) {
     }
 };
 
+// Função para atualizar o estado do item no carrinho ao digitar
+window.atualizarObservacaoItem = function(index, texto) {
+    if (carrinho[index]) {
+        carrinho[index].observacao = texto;
+    }
+};
+
 window.alterarQuantidade = function(id, delta) {
     const item = carrinho.find(item => item.id === id);
     if (!item) return;
@@ -377,28 +384,28 @@ if (formCadastro) {
             const vlrTotal = carrinho.reduce((acc, item) => acc + (parseFloat(item.preco) * item.quantidade), 0);
 
             // 3. Monta o objeto exatamente como admin.js espera ler
-const novoPedidoFirestore = {
-    data: new Date().toISOString(),
-    status: "Aguardando",
-    total: vlrTotal,
-    formaPagamento: document.getElementById("user-pagamento")?.value || "Não informado",
-    troco: document.getElementById("user-troco")?.value || "Não informado",
-    cliente: {
-        nome: dadosCliente.nome,
-        telefone: dadosCliente.telefone,
-        endereco: {
-            rua: dadosCliente.rua,
-            numero: dadosCliente.numero,
-            bairro: dadosCliente.bairro,
-            complemento: dadosCliente.complemento
-        }
-    },
-    itens: carrinho.map(item => ({
-        quantidade: item.quantidade,
-        nome: item.nome,
-        observacao: item.observacao || "" // <--- Salvando no Firestore
-    }))
-};
+            const novoPedidoFirestore = {
+                data: new Date().toISOString(),
+                status: "Aguardando",
+                total: vlrTotal,
+                formaPagamento: document.getElementById("user-pagamento")?.value || "Não informado",
+                troco: document.getElementById("user-troco")?.value || "Não informado",
+                cliente: {
+                    nome: dadosCliente.nome,
+                    telefone: dadosCliente.telefone,
+                    endereco: {
+                        rua: dadosCliente.rua,
+                        numero: dadosCliente.numero,
+                        bairro: dadosCliente.bairro,
+                        complemento: dadosCliente.complemento
+                    }
+                },
+                itens: carrinho.map(item => ({
+                    quantidade: item.quantidade,
+                    nome: item.nome,
+                    observacao: item.observacao || "" // <--- Salvando no Firestore
+                }))
+            };
 
             // 4. Salva o pedido na coleção "pedidos" para o admin.js receber o alerta instantâneo
             await addDoc(collection(db, "pedidos"), novoPedidoFirestore);
