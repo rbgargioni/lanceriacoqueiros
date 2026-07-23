@@ -293,6 +293,7 @@ header {
     object-fit: cover;
     border: 1px solid #eee;
 }
+
 .input-obs-item {
     width: 100%;
     margin-top: 8px; /* Afasta o input do topo (foto/botões) */
@@ -302,6 +303,7 @@ header {
     font-size: 0.85rem;
     background: #fff;
 }
+
 .lanche-item{
     opacity: 0;
     transform: translateY(50px);
@@ -348,4 +350,35 @@ header {
     }
 
 
+}
+
+/* Notificação Toast Customizada */
+#toast-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background-color: var(--cor-primaria);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 3000;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+}
+
+#toast-notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+#toast-notification.error {
+    background-color: #d32f2f;
 }

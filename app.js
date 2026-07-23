@@ -24,6 +24,33 @@ const carrinhoItensContainer = document.getElementById("carrinho-itens");
 const modalCartTotal = document.getElementById("modal-cart-total");
 
 // ==========================================================================
+// FUNÇÃO DE NOTIFICAÇÃO PERSONALIZADA (Substitui os alerts nativos)
+// ==========================================================================
+function exibirAviso(mensagem, tipo = 'sucesso') {
+    const toast = document.getElementById("toast-notification");
+    const toastMsg = document.getElementById("toast-message");
+    const toastIcon = document.getElementById("toast-icon");
+
+    if (!toast || !toastMsg) return;
+
+    toastMsg.innerText = mensagem;
+
+    if (tipo === 'erro') {
+        toast.classList.add("error");
+        if (toastIcon) toastIcon.className = "fas fa-exclamation-circle";
+    } else {
+        toast.classList.remove("error");
+        if (toastIcon) toastIcon.className = "fas fa-check-circle";
+    }
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 3500);
+}
+
+// ==========================================================================
 // AUTENTICAÇÃO GOOGLE E CHECAGEM DE CADASTRO NO FIRESTORE
 // ==========================================================================
 if (btnLogin) {
@@ -32,46 +59,20 @@ if (btnLogin) {
             await signInWithPopup(auth, googleProvider);
         } catch (error) {
             console.error("Erro na autenticação:", error);
-            alert("Falha ao autenticar com o Google.");
+            exibirAviso("Falha ao autenticar com o Google.", "erro");
         }
     });
 }
-document.querySelectorAll(".cat-item").forEach(btn => btn.classList.remove("active"));
 
-// Função para filtrar os lanches via digitação
-window.filtrarPorTexto = function(termo) {
-    const textoBusca = termo.toLowerCase().trim();
-    
-    // Garante que a seção "Sobre" fique oculta enquanto pesquisa
-    const secaoSobre = document.getElementById("secao-sobre");
-    if (secaoSobre) secaoSobre.style.display = "none";
-
-    // Se o campo estiver vazio, restaura a exibição completa
-    if (textoBusca === "") {
-        renderizarCardapio(listaLanches);
-        return;
-    }
-
-    // Filtra no nome OU na descrição do lanche
-    const lanchesFiltrados = listaLanches.filter(lanche => {
-        const nome = (lanche.nome || "").toLowerCase();
-        const descricao = (lanche.descricao || "").toLowerCase();
-        return nome.includes(textoBusca) || descricao.includes(textoBusca);
-    });
-
-    renderizarCardapio(lanchesFiltrados);
-};
 // Observador do estado de autenticação (Dispara automaticamente ao logar/deslogar)
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         usuarioLogado = user;
         if (btnLogin) btnLogin.classList.add("hidden");
         if (userInfo) {
-            // Mostra o primeiro nome vindo da conta Google do usuário
             userInfo.innerText = `Olá, ${user.displayName.split(' ')[0]}`;
             userInfo.classList.remove("hidden");
         }
-        // Busca se o usuário já tem Telefone/Endereço salvos no Firestore
         await carregarDadosUsuarioExistente(user);
     } else {
         usuarioLogado = null;
@@ -82,33 +83,8 @@ onAuthStateChanged(auth, async (user) => {
         }
     }
 });
-function animarCards(){
 
-    const cards = document.querySelectorAll(".lanche-item");
-
-    const observer = new IntersectionObserver((entries)=>{
-
-        entries.forEach((entry,index)=>{
-
-            if(entry.isIntersecting){
-
-                setTimeout(()=>{
-
-                    entry.target.classList.add("show");
-
-                },index*80);
-
-            }
-
-        });
-
-    });
-
-    cards.forEach(card=>observer.observe(card));
-
-}
-
-// Função que puxa os dados adicionais de endereço usando o UID do Google
+// Função para buscar dados cadastrais anteriores
 async function carregarDadosUsuarioExistente(user) {
     try {
         const userDocRef = doc(db, "clientes", user.uid);
@@ -116,7 +92,6 @@ async function carregarDadosUsuarioExistente(user) {
         
         if (userDoc.exists()) {
             const dados = userDoc.data();
-            // Preenche automaticamente o formulário para o usuário não ter que digitar de novo
             if (document.getElementById("user-nome")) document.getElementById("user-nome").value = dados.nome || user.displayName;
             if (document.getElementById("user-cpf")) document.getElementById("user-cpf").value = dados.cpf || "";
             if (document.getElementById("user-telefone")) document.getElementById("user-telefone").value = dados.telefone || "";
@@ -126,7 +101,6 @@ async function carregarDadosUsuarioExistente(user) {
             if (document.getElementById("user-numero")) document.getElementById("user-numero").value = dados.numero || "";
             if (document.getElementById("user-complemento")) document.getElementById("user-complemento").value = dados.complemento || "";
         } else {
-            // Se for a primeira vez dele, apenas joga o nome do Google no campo de Nome
             if (document.getElementById("user-nome")) document.getElementById("user-nome").value = user.displayName || "";
         }
     } catch (error) {
@@ -134,7 +108,27 @@ async function carregarDadosUsuarioExistente(user) {
     }
 }
 
-// Modais - Funções de Controle de Exibição
+// Função para buscar por texto
+window.filtrarPorTexto = function(termo) {
+    const textoBusca = termo.toLowerCase().trim();
+    const secaoSobre = document.getElementById("secao-sobre");
+    if (secaoSobre) secaoSobre.style.display = "none";
+
+    if (textoBusca === "") {
+        renderizarCardapio(listaLanches);
+        return;
+    }
+
+    const lanchesFiltrados = listaLanches.filter(lanche => {
+        const nome = (lanche.nome || "").toLowerCase();
+        const descricao = (lanche.descricao || "").toLowerCase();
+        return nome.includes(textoBusca) || descricao.includes(textoBusca);
+    });
+
+    renderizarCardapio(lanchesFiltrados);
+};
+
+// Controladores dos Modais
 window.abrirModalCarrinho = function() {
     if (modalCarrinho) modalCarrinho.classList.remove("hidden");
     renderizarItensCarrinhoModal();
@@ -163,6 +157,20 @@ onSnapshot(q, (snapshot) => {
     });
     renderizarCardapio(listaLanches);
 });
+
+function animarCards(){
+    const cards = document.querySelectorAll(".lanche-item");
+    const observer = new IntersectionObserver((entries)=>{
+        entries.forEach((entry,index)=>{
+            if(entry.isIntersecting){
+                setTimeout(()=>{
+                    entry.target.classList.add("show");
+                },index*80);
+            }
+        });
+    });
+    cards.forEach(card=>observer.observe(card));
+}
 
 function renderizarCardapio(lanches) {
     if (!menuContainer) return;
@@ -220,7 +228,6 @@ window.adicionarAoCarrinho = function(id) {
     }
     atualizarBarraCarrinho();
     atualizarCard(id);
-    
 };
 
 function atualizarBarraCarrinho() {
@@ -271,13 +278,11 @@ function renderizarItensCarrinhoModal() {
                 </div>
             </div>
             
-            <!-- Campo de Observação por Item -->
             <input type="text" 
                 class="input-obs-item"
                 placeholder="Ex: sem alface, sem ervilha..." 
                 value="${item.observacao || ''}" 
                 onchange="atualizarObservacaoItem(${index}, this.value)"
-                style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85rem; background: #fff;"
             />
         `;
         carrinhoItensContainer.appendChild(itemDiv);
@@ -287,14 +292,6 @@ function renderizarItensCarrinhoModal() {
     if (modalCartTotal) modalCartTotal.innerText = `R$ ${vlrTotal.toFixed(2).replace('.', ',')}`;
 }
 
-// Função para atualizar o estado do item no carrinho ao digitar
-window.atualizarObservacaoItem = function(index, texto) {
-    if (carrinho[index]) {
-        carrinho[index].observacao = texto;
-    }
-};
-
-// Função para atualizar o estado do item no carrinho ao digitar
 window.atualizarObservacaoItem = function(index, texto) {
     if (carrinho[index]) {
         carrinho[index].observacao = texto;
@@ -316,8 +313,8 @@ window.alterarQuantidade = function(id, delta) {
         renderizarItensCarrinhoModal();
     }
 };
-function atualizarCard(id){
 
+function atualizarCard(id){
     const card = document.querySelector(`[onclick="adicionarAoCarrinho('${id}')"]`)?.closest(".lanche-item")
         || [...document.querySelectorAll(".lanche-item")].find(c =>
             c.querySelector(`[onclick*="${id}"]`)
@@ -337,52 +334,44 @@ function atualizarCard(id){
 
         ${
             item ?
-
             `<div class="carrinho-contador-inline">
                 <button onclick="alterarQuantidade('${id}',-1)" class="btn-contador">-</button>
                 <span class="qtd-contador">${item.quantidade}</span>
                 <button onclick="alterarQuantidade('${id}',1)" class="btn-contador">+</button>
             </div>`
-
             :
-
-            `<button class="btn-add-carrinho"
-                onclick="adicionarAoCarrinho('${id}')">
+            `<button class="btn-add-carrinho" onclick="adicionarAoCarrinho('${id}')">
                 <i class="fas fa-plus"></i> Adicionar
             </button>`
         }
     `;
-
 }
-// Ação do Botão Avançar dentro da Sacola
+
 if (btnAvancarPedido) {
     btnAvancarPedido.addEventListener("click", () => {
-        // REGRA DE SEGURANÇA: Se não estiver logado com Google, força o login primeiro
         if (!usuarioLogado) {
-            alert("Para prosseguir com o seu pedido, você precisa se conectar com sua conta Google!");
+            exibirAviso("Conecte-se com sua conta Google para continuar!", "erro");
             fecharModalCarrinho();
             if (btnLogin) btnLogin.click();
             return;
         }
-        // Se já está logado, fecha a sacola e abre o modal para confirmar/inserir telefone e endereço
         fecharModalCarrinho();
         abrirModalCadastro();
     });
 }
 
 // ==========================================================================
-// SUBMIT DO FORMULÁRIO: VINCULA DADOS AO UID GOOGLE E ENVIA WHATSAPP + FIRESTORE
+// SUBMIT DO FORMULÁRIO DE ENTREGA
 // ==========================================================================
 if (formCadastro) {
     formCadastro.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         if (!usuarioLogado) {
-            alert("Erro: Você precisa estar autenticado com o Google.");
+            exibirAviso("Você precisa estar conectado ao Google.", "erro");
             return;
         }
 
-        // Montagem do Objeto mesclando ID do Google com inputs de Telefone/Endereço
         const dadosCliente = {
             uid: usuarioLogado.uid,
             nome: document.getElementById("user-nome").value,
@@ -398,17 +387,12 @@ if (formCadastro) {
         };
 
         try {
-            // Importação necessária para gerar IDs automáticos no Firestore para os pedidos
-            // (Adicione "collection" e "addDoc" nos imports do seu arquivo se preferir, ou use direto do escopo se já importou)
             const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js");
 
-            // 1. Salva ou atualiza os dados cadastrais na coleção "clientes"
             await setDoc(doc(db, "clientes", usuarioLogado.uid), dadosCliente);
 
-            // 2. Calcula valores para salvar a estrutura correta exigida pelo painel admin.js
             const vlrTotal = carrinho.reduce((acc, item) => acc + (parseFloat(item.preco) * item.quantidade), 0);
 
-            // 3. Monta o objeto exatamente como admin.js espera ler
             const novoPedidoFirestore = {
                 data: new Date().toISOString(),
                 status: "Aguardando",
@@ -428,14 +412,13 @@ if (formCadastro) {
                 itens: carrinho.map(item => ({
                     quantidade: item.quantidade,
                     nome: item.nome,
-                    observacao: item.observacao || "" // <--- Salvando no Firestore
+                    observacao: item.observacao || ""
                 }))
             };
 
-            // 4. Salva o pedido na coleção "pedidos" para o admin.js receber o alerta instantâneo
             await addDoc(collection(db, "pedidos"), novoPedidoFirestore);
 
-            // 5. Geração da mensagem de texto formatada para o WhatsApp (Mantido idêntico)
+            // Montagem da mensagem
             let textoPedido = `*🍔 NOVO PEDIDO (LANCHERIA COQUEIRO)*\n\n`;
             textoPedido += `*--- DADOS DE ENTREGA ---*\n`;
             textoPedido += `👤 *Nome:* ${dadosCliente.nome}\n`;
@@ -458,25 +441,30 @@ if (formCadastro) {
             textoPedido += `\n💰 *Total Geral:* R$ ${vlrTotal.toFixed(2).replace('.', ',')}`;
 
             const numeroLancheria = "5551984779161"; 
-            const linkWhatsapp = `https://api.whatsapp.com/send?phone=${numeroLancheria}&text=${encodeURIComponent(textoPedido)}`;
+            // Link wa.me para garantir compatibilidade com iOS/Safari
+            const linkWhatsapp = `https://wa.me/${numeroLancheria}?text=${encodeURIComponent(textoPedido)}`;
             
-            // Limpezas pós sucesso
+            // Limpezas
             carrinho = [];
             atualizarBarraCarrinho();
             fecharModalCadastro();
             renderizarCardapio(listaLanches);
             
-            alert("Cadastro sincronizado e pedido enviado!");
-            window.open(linkWhatsapp, "_blank");
+            exibirAviso("Pedido gerado! Redirecionando para o WhatsApp...");
+
+            // Abre na própria janela para evitar o bloqueio de pop-up no iPhone
+            setTimeout(() => {
+                window.location.href = linkWhatsapp;
+            }, 800);
 
         } catch (error) {
             console.error("Erro ao salvar dados no Firestore:", error);
-            alert("Erro ao sincronizar suas informações com o banco de dados.");
+            exibirAviso("Erro ao sincronizar informações com o servidor.", "erro");
         }
     });
 }
 
-// Filtragem de categorias por abas horizontais
+// Filtragem de categorias
 window.filtrarCategoria = function(categoria) {
     const botoes = document.querySelectorAll(".cat-item");
     botoes.forEach(btn => btn.classList.remove("active"));
