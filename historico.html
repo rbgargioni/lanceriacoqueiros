@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico e Gráficos - Lancheria Coqueiro</title>
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header style="border-radius: 0 0 10px 10px;">
+        <div class="header-container">
+            <img src="logo.png" alt="Logo Coqueiro" class="logo" onerror="this.src='logo.jpg'">
+            <div>
+                <h1>Dashboard &amp; Histórico</h1>
+                <p>Relatórios Financeiros e Análise de Vendas</p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+            <a href="admin.html" style="color: white; text-decoration: none; font-weight: bold;"><i class="fas fa-bell"></i> Monitor de Pedidos</a>
+            <a href="importar.html" style="color: white; text-decoration: none; font-weight: bold;"><i class="fas fa-utensils"></i> Cardápio</a>
+            <a href="index.html" style="color: white; text-decoration: none; font-weight: bold;"><i class="fas fa-eye"></i> Ver Site</a>
+        </div>
+    </header>
+
+    <main style="padding: 20px; max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- CARDS DE RESUMO (KPIs) -->
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 220px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #138342;">
+                <span style="color: #666; font-size: 0.85rem; font-weight: bold;">FATURAMENTO TOTAL</span>
+                <h2 id="kpi-faturamento" style="color: #138342; margin-top: 5px;">R$ 0,00</h2>
+            </div>
+            <div style="flex: 1; min-width: 220px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #007bff;">
+                <span style="color: #666; font-size: 0.85rem; font-weight: bold;">TOTAL DE PEDIDOS</span>
+                <h2 id="kpi-pedidos" style="color: #007bff; margin-top: 5px;">0</h2>
+            </div>
+            <div style="flex: 1; min-width: 220px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #e4b223;">
+                <span style="color: #666; font-size: 0.85rem; font-weight: bold;">TICKET MÉDIO</span>
+                <h2 id="kpi-ticket-medio" style="color: #e4b223; margin-top: 5px;">R$ 0,00</h2>
+            </div>
+        </div>
+
+        <!-- GRÁFICOS -->
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <!-- Gráfico 1: Vendas por Dia -->
+            <div style="flex: 2; min-width: 320px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <h3 style="margin-bottom: 15px; color: #3e3e2f;"><i class="fas fa-chart-line"></i> Faturamento dos Últimos Dias</h3>
+                <canvas id="grafico-vendas-dia" style="max-height: 300px;"></canvas>
+            </div>
+
+            <!-- Gráfico 2: Mais Vendidos -->
+            <div style="flex: 1; min-width: 280px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <h3 style="margin-bottom: 15px; color: #3e3e2f;"><i class="fas fa-chart-pie"></i> Lanches Mais Vendidos</h3>
+                <canvas id="grafico-mais-vendidos" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+
+        <!-- TABELA DE HISTÓRICO DE PEDIDOS -->
+        <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <h3 style="margin-bottom: 15px; color: #3e3e2f;"><i class="fas fa-history"></i> Histórico Detalhado</h3>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #eee; background: #fafafa;">
+                            <th style="padding: 10px;">Data/Hora</th>
+                            <th style="padding: 10px;">Cliente</th>
+                            <th style="padding: 10px;">Itens</th>
+                            <th style="padding: 10px;">Pagamento</th>
+                            <th style="padding: 10px;">Total</th>
+                            <th style="padding: 10px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-historico-body">
+                        <tr>
+                            <td colspan="6" style="padding: 20px; text-align: center; color: #777;">Carregando histórico...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="historico.js"></script>
+</body>
+</html>

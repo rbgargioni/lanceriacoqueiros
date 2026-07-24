@@ -154,14 +154,15 @@ function configurarBotoesPedidos() {
         };
     });
 
+    // Alterado: Em vez de deletar (deleteDoc), atualiza o status para "Concluído"
     document.querySelectorAll(".btn-concluir").forEach(btn => {
         btn.onclick = async (e) => {
             const id = e.currentTarget.getAttribute("data-id");
-            if (confirm("Deseja arquivar e concluir este pedido?")) {
+            if (confirm("Deseja concluir e arquivar este pedido?")) {
                 try {
-                    await deleteDoc(doc(db, "pedidos", id));
+                    await updateDoc(doc(db, "pedidos", id), { status: "Concluído" });
                 } catch (err) {
-                    console.error(err);
+                    console.error("Erro ao concluir pedido:", err);
                 }
             }
         };
