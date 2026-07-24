@@ -3,35 +3,35 @@ import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/fir
 
 let chartVendasDia = null;
 let chartMaisVendidos = null;
+let todosOsPedidos = []; // Guarda todos os pedidos localmente para busca rápida
 
 async function carregarDashboard() {
     try {
         const q = query(collection(db, "pedidos"), orderBy("data", "desc"));
         const snapshot = await getDocs(q);
 
+        todosOsPedidos = [];
         let totalFaturamento = 0;
         let totalPedidos = 0;
         const contagemItens = {};
         const faturamentoPorDia = {};
-        const tabelaBody = document.getElementById("tabela-historico-body");
-
-        if (tabelaBody) tabelaBody.innerHTML = "";
 
         if (snapshot.empty) {
-            if (tabelaBody) tabelaBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">Nenhum pedido encontrado.</td></tr>`;
+            renderizarTabela([]);
             return;
         }
 
         snapshot.forEach(docSnap => {
             const p = docSnap.data();
-            
-            // Só contabiliza pedidos que não foram cancelados
+            todosOsPedidos.push(p);
+
+            // Métricas (KPIs) e Gráficos apenas de pedidos não cancelados
             if (p.status !== "Cancelado") {
                 const valor = parseFloat(p.total) || 0;
                 totalFaturamento += valor;
                 totalPedidos++;
 
-                // Agrupamento por Data (YYYY-MM-DD)
+                // Agrupamento por Data (DD/MM/YYYY)
                 const dataFormatada = p.data ? new Date(p.data).toLocaleDateString('pt-BR') : 'Outros';
                 faturamentoPorDia[dataFormatada] = (faturamentoPorDia[dataFormatada] || 0) + valor;
 
@@ -42,40 +42,74 @@ async function carregarDashboard() {
                     });
                 }
             }
-
-            // Popula Tabela
-            if (tabelaBody) {
-                const tr = document.createElement("tr");
-                tr.style.borderBottom = "1px solid #eee";
-                
-                const dataString = p.data ? new Date(p.data).toLocaleString('pt-BR') : '-';
-                const itensTexto = p.itens ? p.itens.map(i => `${i.quantidade}x ${i.nome}`).join(", ") : "-";
-
-                tr.innerHTML = `
-                    <td style="padding: 10px;">${dataString}</td>
-                    <td style="padding: 10px;"><strong>${p.cliente?.nome || 'Anônimo'}</strong><br><small>${p.cliente?.telefone || ''}</small></td>
-                    <td style="padding: 10px; max-width: 250px;">${itensTexto}</td>
-                    <td style="padding: 10px;">${p.formaPagamento || '-'}</td>
-                    <td style="padding: 10px; font-weight: bold; color: #138342;">R$ ${parseFloat(p.total || 0).toFixed(2)}</td>
-                    <td style="padding: 10px;"><span style="background:#e8f5e9; color:#138342; padding:4px 8px; border-radius:12px; font-size:0.8rem; font-weight:bold;">${p.status || 'Concluído'}</span></td>
-                `;
-                tabelaBody.appendChild(tr);
-            }
         });
 
-        // Atualizar KPIs
+        // Atualizar KPIs na tela
         document.getElementById("kpi-faturamento").innerText = `R$ ${totalFaturamento.toFixed(2).replace('.', ',')}`;
         document.getElementById("kpi-pedidos").innerText = totalPedidos;
         const ticketMedio = totalPedidos > 0 ? (totalFaturamento / totalPedidos) : 0;
         document.getElementById("kpi-ticket-medio").innerText = `R$ ${ticketMedio.toFixed(2).replace('.', ',')}`;
 
-        // Renderizar Gráficos
+        // Renderiza a Tabela e os Gráficos com a lista completa inicial
+        renderizarTabela(todosOsPedidos);
         renderizarGraficoVendas(faturamentoPorDia);
         renderizarGraficoMaisVendidos(contagemItens);
 
     } catch (error) {
         console.error("Erro ao carregar histórico:", error);
     }
+}
+
+// Função responsável apenas por desenhar a tabela na tela
+function renderizarTabela(lista) {
+    const tabelaBody = document.getElementById("tabela-historico-body");
+    if (!tabelaBody) return;
+
+    tabelaBody.innerHTML = "";
+
+    if (lista.length === 0) {
+        tabelaBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px; color: #888;">Nenhum pedido encontrado.</td></tr>`;
+        return;
+    }
+
+    lista.forEach(p => {
+        const tr = document.createElement("tr");
+        tr.style.borderBottom = "1px solid #eee";
+        
+        const dataString = p.data ? new Date(p.data).toLocaleString('pt-BR') : '-';
+        const itensTexto = p.itens ? p.itens.map(i => `${i.quantidade}x ${i.nome}`).join(", ") : "-";
+
+        tr.innerHTML = `
+            <td style="padding: 10px;">${dataString}</td>
+            <td style="padding: 10px;"><strong>${p.cliente?.nome || 'Anônimo'}</strong><br><small style="color: #666;">${p.cliente?.telefone || ''}</small></td>
+            <td style="padding: 10px; max-width: 250px;">${itensTexto}</td>
+            <td style="padding: 10px;">${p.formaPagamento || '-'}</td>
+            <td style="padding: 10px; font-weight: bold; color: #138342;">R$ ${parseFloat(p.total || 0).toFixed(2).replace('.', ',')}</td>
+            <td style="padding: 10px;"><span style="background:#e8f5e9; color:#138342; padding:4px 8px; border-radius:12px; font-size:0.8rem; font-weight:bold;">${p.status || 'Concluído'}</span></td>
+        `;
+        tabelaBody.appendChild(tr);
+    });
+}
+
+// Evento de Pesquisa (Filtra por Nome ou Telefone)
+const inputBusca = document.getElementById("input-busca-historico");
+if (inputBusca) {
+    inputBusca.addEventListener("input", (e) => {
+        const termo = e.target.value.toLowerCase().trim();
+
+        if (termo === "") {
+            renderizarTabela(todosOsPedidos);
+            return;
+        }
+
+        const filtrados = todosOsPedidos.filter(p => {
+            const nome = (p.cliente?.nome || "").toLowerCase();
+            const telefone = (p.cliente?.telefone || "").toLowerCase();
+            return nome.includes(termo) || telefone.includes(termo);
+        });
+
+        renderizarTabela(filtrados);
+    });
 }
 
 function renderizarGraficoVendas(dadosDias) {
