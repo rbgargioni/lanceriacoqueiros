@@ -4,7 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lancheria Coqueiro - Desde 1977</title>
+    
+    <!-- Configurações PWA e Favicon -->
     <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Metatags para App no iPhone (iOS WebApp) -->
+    <meta name="apple-mobile-web-app-title" content="Coqueiro">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="logo.jpg">
+
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -32,19 +42,21 @@
         <button class="cat-item" onclick="filtrarCategoria('bebidas')">🥤 Bebidas</button>
         <button class="cat-item" onclick="filtrarCategoria('cobertos')">🍽️ Cobertos</button>
     </div>
+
     <!-- Barra de Pesquisa de Lanches -->
-<div class="search-container" style="max-width: 600px; margin: 10px auto; padding: 0 15px;">
-    <div style="position: relative;">
-        <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888;"></i>
-        <input 
-            type="text" 
-            id="input-busca" 
-            placeholder="Buscar lanche ou ingrediente (ex: calabresa, xis, coca)..." 
-            oninput="filtrarPorTexto(this.value)"
-            style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #ddd; border-radius: 20px; font-size: 0.9rem; outline: none; background: white;"
-        />
+    <div class="search-container" style="max-width: 600px; margin: 10px auto; padding: 0 15px;">
+        <div style="position: relative;">
+            <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888;"></i>
+            <input 
+                type="text" 
+                id="input-busca" 
+                placeholder="Buscar lanche ou ingrediente (ex: calabresa, xis, coca)..." 
+                oninput="filtrarPorTexto(this.value)"
+                style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #ddd; border-radius: 20px; font-size: 0.9rem; outline: none; background: white;"
+            />
+        </div>
     </div>
-</div>
+
     <main style="padding: 15px; max-width: 600px; margin: 0 auto;">
         <div id="secao-sobre" style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
             <div style="text-align: center; margin-bottom: 20px;">
@@ -63,7 +75,6 @@
                 </h3>
                 
                 <div style="display: flex; gap: 15px; background: #f9f9f9; border: 1px solid #eee; border-radius: 10px; padding: 15px; flex-wrap: wrap; align-items: center;">
-                    
                     <div style="flex: 1; min-width: 180px; max-width: 240px; margin: 0 auto;">
                         <img src="https://www.rbsdirect.com.br/imagesrc/25267365.jpg?w=1400" alt="Xis Gigante Coqueiro GZH" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); object-fit: cover; aspect-ratio: 16/10;">
                     </div>
@@ -71,7 +82,7 @@
                     <div style="flex: 2; min-width: 240px; display: flex; flex-direction: column; gap: 6px;">
                         <span style="font-size: 0.7rem; background: var(--cor-destaque, #e4b223); color: #fff; font-weight: bold; padding: 2px 6px; border-radius: 4px; align-self: flex-start;">REPORTAGEM GZH</span>
                         <h4 style="font-size: 1rem; color: #222; line-height: 1.3; font-weight: 700; margin: 0;">
-                            Como surgiram os xis giants em Porto Alegre
+                            Como surgiram os xis gigantes em Porto Alegre
                         </h4>
                         <p style="font-size: 0.85rem; color: #666; margin: 0; line-height: 1.4;">
                             O título de cidade referência do xis gaúcho: Porto Alegre tem recebido uma série de lancherias com uma proposta específica da iguaria: o xis gigante — também chamado de tamanho família, calota ou roda de carreta. Conheça a história do lanche criado na década de 1970.
@@ -82,7 +93,8 @@
                     </div>
                 </div>
             </div>
-             <!-- Seção de Localização e Contato -->
+
+            <!-- Seção de Localização e Contato -->
             <div style="border-top: 2px dashed #eee; padding-top: 20px; margin-bottom: 25px;">
                 <h3 style="color: var(--cor-primaria); margin-bottom: 15px; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
                     <i class="fas fa-map-marker-alt"></i> Onde Estamos & Contato
@@ -117,6 +129,7 @@
         </div>
     </main>
 
+    <!-- Barra Flutuante de Sacola -->
     <div id="cart-bar" class="hidden" onclick="abrirModalCarrinho()">
         <div style="display: flex; align-items: center; gap: 10px;">
             <span id="cart-qtd" class="cart-badge">0</span>
@@ -125,6 +138,24 @@
         <span id="cart-total" style="font-weight: bold;">R$ 0,00</span>
     </div>
 
+    <!-- MODAL DE ADICIONAIS DINÂMICOS DO FIRESTORE -->
+    <div id="modal-adicionais" class="modal-bg hidden">
+        <div class="modal-content" style="max-width: 460px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 id="adicionais-titulo">Turbine seu Lanche</h2>
+                <button onclick="fecharModalAdicionais()" style="background:none; border:none; font-size: 1.2rem; cursor:pointer; color:#999;"><i class="fas fa-times"></i></button>
+            </div>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Selecione os adicionais que deseja para o seu lanche:</p>
+            
+            <!-- Os adicionais carregados do Firestore serão inseridos dinamicamente dentro dessa DIV -->
+            <div id="lista-opcoes-adicionais" style="max-height: 280px; overflow-y: auto; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+            </div>
+
+            <button id="btn-confirmar-adicionais" class="btn-finalizar" style="width: 100%; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer;">Adicionar ao Carrinho</button>
+        </div>
+    </div>
+
+    <!-- MODAL CARRINHO -->
     <div id="modal-carrinho" class="modal-bg hidden">
         <div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -143,6 +174,7 @@
         </div>
     </div>
 
+    <!-- MODAL CADASTRO / DADOS DO CLIENTE -->
     <div id="modal-cadastro" class="modal-bg hidden">
         <div class="modal-content" style="max-width: 460px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -185,8 +217,8 @@
                         <label>Complemento:</label>
                         <input type="text" id="user-complemento" placeholder="Apto, Bloco, Casa (Opcional)">
                     </div>
-                </div>           
-               <div class="form-group" style="margin-top: 12px;">
+                </div>          
+                <div class="form-group" style="margin-top: 12px;">
                     <label>Forma de Pagamento:</label>
                     <select id="user-pagamento" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; background: white;" onchange="controlarCampoTroco()">
                         <option value="" disabled selected>Selecione como quer pagar</option>
@@ -202,23 +234,43 @@
                     <input type="text" id="user-troco" placeholder="Ex: Troco para R$ 50,00 ou Não preciso">
                 </div>
 
-                <button type="submit" class="btn-salvar-cadastro">Salvar Cadastro e Enviar Pedido</button>
+                <button type="submit" class="btn-salvar-cadastro" style="margin-top: 15px;">Salvar Cadastro e Enviar Pedido</button>
             </form>
-
-
-            <div id="grupo-troco" class="form-group hidden" style="margin-top: 12px;">
-                <label>Precisa de troco para quanto?</label>
-                <input type="text" id="user-troco" placeholder="Ex: Troco para R$ 50,00 ou Não preciso">
-            </div>
         </div>
     </div>
+
+    <!-- BANNER EXPLICATIVO PARA ATALHO NO IPHONE (iOS) -->
+    <div id="banner-pwa-ios" class="hidden" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 9999; text-align: center; border: 2px solid var(--cor-primaria, #138342);">
+        <p style="font-size: 0.9rem; color: #333; margin-bottom: 8px;">
+            📲 <strong>Instale o app da Lancheria Coqueiro!</strong>
+        </p>
+        <p style="font-size: 0.8rem; color: #666; margin-bottom: 12px;">
+            Toque no ícone de <strong>Compartilhar</strong> <i class="fas fa-share-square"></i> do Safari e selecione <strong>"Adicionar à Tela de Início"</strong> <i class="fas fa-plus-square"></i>.
+        </p>
+        <button onclick="fecharBannerIOS()" style="background: var(--cor-primaria, #138342); color: white; border: none; padding: 6px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">Entendi</button>
+    </div>
+
     <!-- Toast Notificação Customizado -->
     <div id="toast-notification">
         <i id="toast-icon" class="fas fa-check-circle"></i>
         <span id="toast-message">Mensagem aqui</span>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <!-- SCRIPT DE DETECÇÃO DO IPHONE -->
+    <script>
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+
+        if (isIOS && !isStandalone) {
+            document.getElementById('banner-pwa-ios').classList.remove('hidden');
+        }
+
+        function fecharBannerIOS() {
+            document.getElementById('banner-pwa-ios').classList.add('hidden');
+        }
+    </script>
+
+    <!-- Script Principal JS -->
     <script type="module" src="app.js"></script>
 
 </body>
