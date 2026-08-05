@@ -147,7 +147,6 @@
             </div>
             <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Selecione os adicionais que deseja para o seu lanche:</p>
             
-            <!-- Os adicionais carregados do Firestore serão inseridos dinamicamente dentro dessa DIV -->
             <div id="lista-opcoes-adicionais" style="max-height: 280px; overflow-y: auto; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
             </div>
 
@@ -256,17 +255,21 @@
         <span id="toast-message">Mensagem aqui</span>
     </div>
 
-    <!-- SCRIPT DE DETECÇÃO DO IPHONE -->
+    <!-- DETECÇÃO DO IPHONE -->
     <script>
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+        document.addEventListener("DOMContentLoaded", () => {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
 
-        if (isIOS && !isStandalone) {
-            document.getElementById('banner-pwa-ios').classList.remove('hidden');
-        }
+            if (isIOS && !isStandalone) {
+                const banner = document.getElementById('banner-pwa-ios');
+                if (banner) banner.classList.remove('hidden');
+            }
+        });
 
         function fecharBannerIOS() {
-            document.getElementById('banner-pwa-ios').classList.add('hidden');
+            const banner = document.getElementById('banner-pwa-ios');
+            if (banner) banner.classList.add('hidden');
         }
     </script>
 
